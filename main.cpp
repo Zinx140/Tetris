@@ -7,188 +7,222 @@
 
 using namespace std;
 
-//ukuran arena
+// Ukuran arena
 const int width = 25;
 const int height = 20;
 
-// 7 bentuk tetromino ukuran 4x4 dirandom index depannya [random][4][4]
-// buat angka 0 artinya itu blank space kalau angka 1 itu nanti keluarnya jadi kotak tetromino nya
+// Tetromino menggunakan vector
 vector<vector<vector<int>>> tetromino = {
-                                            {{1, 1, 1, 1}},                 // I
-                                            {{1, 1}, {1, 1}},               // O
-                                            {{0, 1, 0}, {1, 1, 1}},         // T
-                                            {{1, 0, 0}, {1, 1, 1}},         // L
-                                            {{0, 0, 1}, {1, 1, 1}},         // J
-                                            {{0, 1, 1}, {1, 1, 3}},         // S
-                                            {{1, 1, 0}, {3, 1, 1}}          // Z
-                                        };
+    {{1, 1, 1, 1}},                  // I
+    {{1, 1}, {1, 1}},                // O
+    {{0, 1, 0}, {1, 1, 1}},          // T
+    {{1, 0, 0}, {1, 1, 1}},          // L
+    {{0, 0, 1}, {1, 1, 1}},          // J
+    {{0, 1, 1}, {1, 1, 0}},          // S
+    {{1, 1, 0}, {0, 1, 1}}           // Z
+};
 
-//Buat ngegambar tetromino di dalam arena
-void summonTetromino(int arena[height][width], int position_x, int position_y, int randomTetromino) {
-    for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
-            if (i == 0 || j == 0 || i == height-1 || j == width-1) {
-                arena[i][j] = 2; //ngosongkan arena dulu buat nge hapus jejak tetromino yang belum jatuh atau dipindah
-            } else {
-                if (arena[i][j] != 7) {
-                    arena[i][j] = 0;
+// Fungsi untuk memutar tetromino ke kanan (90 derajat searah jarum jam)
+vector<vector<int>> rotateMatrix(const vector<vector<int>> &matrix) {
+    int n = matrix.size();
+    int m = matrix[0].size();
+    vector<vector<int>> rotated(m, vector<int>(n, 0));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            rotated[j][n - 1 - i] = matrix[i][j];
+        }
+    }
+    return rotated;
+}
+
+// Fungsi untuk memeriksa apakah tetromino bisa diputar
+bool canRotate(int arena[height][width], int position_x, int position_y, vector<vector<int>> &rotatedTetromino) {
+    int newHeight = rotatedTetromino.size();
+    int newWidth = rotatedTetromino[0].size();
+    for (int i = 0; i < newHeight; i++) {
+        for (int j = 0; j < newWidth; j++) {
+            if (rotatedTetromino[i][j] == 1) {
+                int newY = position_y + i;
+                int newX = position_x + j;
+                if (newY >= height || newX < 0 || newX >= width || arena[newY][newX] == 7 || arena[newY][newX] == 2) {
+                    return false; // Tidak bisa diputar
                 }
             }
         }
     }
-
-    for (int i = 0; i < tetromino[randomTetromino].size(); i++) { // buat ngegambar ukuran tinggi tetromino pakai vektor biar gk nembus
-        for (int j = 0; j < tetromino[randomTetromino][i].size(); j++) { // buat ngegambar lebar tetromino vektor
-            arena[position_y + i][position_x + j] = tetromino[randomTetromino][i][j]; // buat ngeganti tempat di peta biar ngebentuk tetromino nya
-        }
-    }
-
+    return true;
 }
 
-//buat ngegambar arena yang lokasi tetromino nya udah di geser
+// Fungsi untuk menggambar tetromino di dalam arena
+void summonTetromino(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino) {
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            if (i == 0 || j == 0 || i == height - 1 || j == width - 1) {
+                arena[i][j] = 2; // Border
+            } else {
+                if (arena[i][j] != 7) {
+                    arena[i][j] = 0; // Arena kosong
+                }
+            }
+        }
+    }
+    for (int i = 0; i < currentTetromino.size(); i++) {
+        for (int j = 0; j < currentTetromino[i].size(); j++) {
+            if (currentTetromino[i][j] == 1) {
+                arena[position_y + i][position_x + j] = currentTetromino[i][j];
+            }
+        }
+    }
+}
+
+// Fungsi untuk menggambar arena
 void draw(int arena[height][width]) {
-    char block = 219;
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             if (arena[i][j] == 1 || arena[i][j] == 7) {
-                cout << "@"; //untuk ngegambar tetromino
+                cout << "@a"; // Tetromino
             } else if (arena[i][j] == 2) {
-                cout << "."; //untuk ngegambbar border arena
+                cout << "#"; // Border
             } else {
-                cout << " "; //untuk ngegambbar arena kosong
+                cout << " "; // Arena kosong
             }
         }
         cout << endl;
     }
 }
 
-bool canMove(int arena[height][width], int &position_x, int position_y, int randomTetromino, int dx) {
-    int newY = tetromino[randomTetromino].size();
-    int newX = position_x + tetromino[randomTetromino][0].size();
-    bool flag = false;
-    int solid = -1;
-    int blank;
-
-    for (int i = 0; i < tetromino[randomTetromino][0].size(); i++) {
-        if (tetromino[randomTetromino][newY - 1][i] == 3) {
-            flag = true;
-            blank = i;
-        }
-    }
-
-    for (int i = position_x + dx; i < newX; i++) {
-        if ((arena[newY + position_y - 1][i] == 2 || arena[newY + position_y - 1][i + dx] == 7) && !flag) {
-            for (int j = position_y; j < tetromino[randomTetromino].size() + position_y; j++) {
-                for (int k = position_x; k < newX; k++) {
-                    if (arena[j - 1][k] == 1) {
-                        arena[j - 1][k] = 7;
-                    }
+bool canMove(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino, int dx) {
+    int newHeight = currentTetromino.size();
+    int newWidth = currentTetromino[0].size();
+    for (int i = 0; i < newHeight; i++) {
+        for (int j = 0; j < newWidth; j++) {
+            if (currentTetromino[i][j] == 1) {
+                int newY = position_y + i;
+                int newX = position_x + j;
+                if (newY >= height || newX < 0 || newX >= width || arena[newY][newX] == 7 || arena[newY][newX] == 2) {
+                    return false; // Tidak bisa bergerak
                 }
-            }
-            return false;
-        } else if (arena[newY + position_y - 1][i] == 2 && flag) {
-            for (int j = position_y; j < tetromino[randomTetromino].size() + position_y; j++) {
-                for (int k = position_x; k < newX; k++) {
-                    if (arena[j - 1][k] == 1) {
-                        arena[j - 1][k] = 7;
-                    }
-                }
-            }
-            return false;
-        } else if (arena[newY + position_y - 1][i] == 7 && flag) {
-            if (arena[newY + position_y - 1][blank + position_x] == 7 && arena[newY + position_y - 1][position_x + 1] != 7) {
-                for (int j = position_y - 1; j < tetromino[randomTetromino].size() + position_y; j++) {
-                    for (int k = position_x; k < newX; k++) {
-                        if (arena[j - 1][k] == 1) {
-                            arena[j][k] = 7;
-                            arena[j][position_x + 1] = 7;
-                        }
-                    }
-                }
-                return false;
-            } else {
-                for (int j = position_y; j < tetromino[randomTetromino].size() + position_y; j++) {
-                    for (int k = position_x; k < newX; k++) {
-                        if (arena[j - 1][k] == 1) {
-                            arena[j - 1][k] = 7;
-                        }
-                    }
-                }
-                return false;
             }
         }
     }
-    position_x += dx;
     return true;
-
 }
 
-//belum diuji karena hitbox dan tetromino belum bisa muter
-void clearLines (int arena[height][width]) {
-    for (int i = 1; i < height; i ++) {
-    bool flag = true;
-        for (int j = 1; j < width; j++) {
-            if (arena[i][j] != 7) {
-                flag = false;
+bool canTurnLeft(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino, int dx) {
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            int newHeight = currentTetromino.size();
+            int newWidth = currentTetromino[0].size();
+            for (int i = position_y; i <= position_y + newHeight + 1; i++) {
+                if (arena[i][position_x - 1] == 7) {
+                    return false;
+                }
             }
         }
-        if (flag) {
-            for (int j = 1; j < width; j++) {
+    }
+    return true;
+}
+
+bool canTurnRight(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino, int dx) {
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            int newHeight = currentTetromino.size();
+            int newWidth = currentTetromino[0].size();
+            for (int i = position_y; i <= position_y + newHeight + 1; i++) {
+                if (arena[i][position_x + newWidth] == 7) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+void clearLines(int arena[height][width]) {
+    for (int i = 1; i < height - 1; i++) {
+        bool fullLine = true;
+        for (int j = 1; j < width - 1; j++) {
+            if (arena[i][j] != 7) {
+                fullLine = false;
+                break;
+            }
+        }
+        if (fullLine) {
+            for (int j = 1; j < width - 1; j++) {
                 arena[i][j] = 0;
             }
+            for (int k = i; k > 1; k--) {
+                for (int j = 1; j < width - 1; j++) {
+                    arena[k][j] = arena[k - 1][j];
+                }
+            }
         }
     }
 }
 
-bool gameOver (int arena[height][width]) { // menghentikan game kalo sudah diujung
-    for (int j = 1; j < width; j++) {
-        if (arena[3][j] == 7) {
-            return false;
+bool gameOver(int arena[height][width]) {
+    for (int j = 1; j < width - 1; j++) {
+        if (arena[1][j] == 7) {
+            return true;
         }
     }
-    return true;
+    return false;
 }
 
-int main () {
+int main() {
     srand(time(0));
     int dx = 0;
-    int tetromino_y = 1; // inisialisasi posisi y tetromino
-    int tetromino_x = rand() % 21 + 1; // inisialisasi posisi x tetromino
-    int randomTetromino = rand() % 7; // random untuk bentuk tetromino
-    int arena[height][width] = {0}; // inisialisasi buat arena nya
+    int tetromino_y = 1;
+    int tetromino_x = rand() % 19 + 1;
+    int randomTetromino = rand() % 7;
+    vector<vector<int>> currentTetromino = tetromino[randomTetromino];
+    int arena[height][width] = {0};
 
-    while (gameOver(arena)) {
-        if (canMove(arena, tetromino_x, tetromino_y, randomTetromino, dx)) {
+    while (!gameOver(arena)) {
+        if (canMove(arena, tetromino_x, tetromino_y, currentTetromino, dx)) {
             dx = 0;
-            if (kbhit()) { // kontrol untuk geser tetromino nya kalau bisa buat biar tetromino nya nggak melebihi border
+            if (kbhit()) {
                 char control = getch();
-
-                if (control == 'a') { // geser kiri
-                    if (tetromino_x != 1) { // mbatesi gerakan
+                if (control == 'a') {
+                    if (tetromino_x > 1 && canTurnLeft(arena, tetromino_x, tetromino_y, currentTetromino, dx)) {
                         dx = -1;
+                        tetromino_x += dx;
                     }
-                } else if (control == 'd') { // geser kanan
-                    if (tetromino_x + tetromino[randomTetromino][0].size() < width - 1) { // mbatasi gerakan;
+                } else if (control == 'd') {
+                    if (tetromino_x + currentTetromino[0].size() < width - 1 && canTurnRight(arena, tetromino_x, tetromino_y, currentTetromino, dx)) {
                         dx = 1;
+                        tetromino_x += dx;
+                    }
+                } else if (control == 'w') { // Rotasi
+                    vector<vector<int>> rotatedTetromino = rotateMatrix(currentTetromino);
+                    if (canRotate(arena, tetromino_x, tetromino_y, rotatedTetromino)) {
+                        currentTetromino = rotatedTetromino;
                     }
                 }
             }
 
-            summonTetromino(arena, tetromino_x, tetromino_y, randomTetromino);
-            tetromino_y++; //nurunin tetromino
-
+            summonTetromino(arena, tetromino_x, tetromino_y, currentTetromino);
+            tetromino_y++;
         } else {
-            tetromino_y = 1; // ngembaliin posisi y tetromino ke atas karena udah jatuh ke bawah biar summon lagi
-            tetromino_x = rand() % 21 + 1; // ngerandom ulang posisi x tetromino
-            randomTetromino = rand() % 7; // ngerandom bentuk tetromino lagi
+            for (int i = 0; i < currentTetromino.size(); i++) {
+                for (int j = 0; j < currentTetromino[i].size(); j++) {
+                    if (currentTetromino[i][j] == 1) {
+                        arena[tetromino_y + i - 1][tetromino_x + j] = 7;
+                    }
+                }
+            }
+            tetromino_y = 1;
+            tetromino_x = rand() % 19 + 1;
+            randomTetromino = rand() % 7;
+            currentTetromino = tetromino[randomTetromino];
         }
-        draw(arena); // gambar game
+
+        draw(arena);
         clearLines(arena);
-        Sleep(100); //ngelambatin loop
-        system("cls"); // ngehapus yang udah tertulis
+        Sleep(150);
+        system("cls"); // Bersihkan layar untuk menggambar ulang
     }
 
+    cout << "Game Over!" << endl;
     return 0;
 }
-
-
