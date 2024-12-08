@@ -80,7 +80,7 @@ void draw(int arena[height][width]) {
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             if (arena[i][j] == 1 || arena[i][j] == 7) {
-                cout << "@a"; // Tetromino
+                cout << "@"; // Tetromino
             } else if (arena[i][j] == 2) {
                 cout << "#"; // Border
             } else {
