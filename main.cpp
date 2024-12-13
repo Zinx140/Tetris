@@ -11,6 +11,8 @@ using namespace std;
 const int width = 25;
 const int height = 20;
 
+int input_menu;
+
 // Tetromino menggunakan vector
 vector<vector<vector<int>>> tetromino = {
     {{1, 1, 1, 1}},                  // I
@@ -76,7 +78,7 @@ void summonTetromino(int arena[height][width], int position_x, int position_y, v
 }
 
 // Fungsi untuk menggambar arena
-void draw(int arena[height][width]) {
+void draw(int arena[height][width], vector<vector<int>> &nextTetromino) {
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             if (arena[i][j] == 1 || arena[i][j] == 7) {
@@ -85,6 +87,20 @@ void draw(int arena[height][width]) {
                 cout << "#"; // Border
             } else {
                 cout << " "; // Arena kosong
+            }
+        }
+        cout << endl;
+    }
+    cout << endl;
+
+    // Gambar Tetris berikutnya di bagian kanan
+    cout << "Next Tetromino: " << endl;
+    for (int i = 0; i < nextTetromino.size(); i++) {
+        for (int j = 0; j < nextTetromino[i].size(); j++) {
+            if (nextTetromino[i][j] == 1) {
+                cout << "@";
+            } else {
+                cout << " ";
             }
         }
         cout << endl;
@@ -169,6 +185,19 @@ bool gameOver(int arena[height][width]) {
     return false;
 }
 
+//main menu (cuma sementara)
+void main_menu(){
+    cout << "=== Tetris ===" <<  endl;
+    cout << "1. Play" << endl;
+    cout << "2. leaderboard" << endl;
+    cout << "0. Exit" << endl;
+    cout << ">> "; cin >> input_menu;
+
+    while (input_menu<0 || input_menu>2){
+        cout << ">> "; cin >> input_menu;
+    }
+}
+
 int main() {
     srand(time(0));
     int dx = 0;
@@ -176,9 +205,15 @@ int main() {
     int tetromino_x = rand() % 19 + 1;
     int randomTetromino = rand() % 7;
     vector<vector<int>> currentTetromino = tetromino[randomTetromino];
+    vector<vector<int>> nextTetromino = tetromino[rand() % 7];
     int arena[height][width] = {0};
 
-    while (!gameOver(arena)) {
+
+    main_menu();
+
+    switch (input_menu){
+    case 1:
+        while (!gameOver(arena)) {
         if (canMove(arena, tetromino_x, tetromino_y, currentTetromino, dx)) {
             dx = 0;
             if (kbhit()) {
@@ -213,16 +248,20 @@ int main() {
             }
             tetromino_y = 1;
             tetromino_x = rand() % 19 + 1;
-            randomTetromino = rand() % 7;
-            currentTetromino = tetromino[randomTetromino];
-        }
+            currentTetromino = nextTetromino; // Set the current Tetromino to the next
+            nextTetromino = tetromino[rand() % 7]; // Generate a new next Tetromino
 
-        draw(arena);
+        draw(arena, nextTetromino);
         clearLines(arena);
         Sleep(150);
         system("cls"); // Bersihkan layar untuk menggambar ulang
     }
 
     cout << "Game Over!" << endl;
-    return 0;
+
+    break;
+    }
+
+}
+return 0;
 }
