@@ -5,6 +5,7 @@
 #include <time.h>
 #include <vector>
 
+// buat yg baca ini ada bug, kalo di input 1 main menunya lgsg game over!
 using namespace std;
 
 // Ukuran arena
