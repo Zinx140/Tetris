@@ -35,6 +35,9 @@ vector<vector<int>> rotateMatrix(const vector<vector<int>> &matrix) {
     return rotated;
 }
 
+int candrop[width];
+
+
 // Fungsi untuk memeriksa apakah tetromino bisa diputar
 bool canRotate(int arena[height][width], int position_x, int position_y, vector<vector<int>> &rotatedTetromino) {
     int newHeight = rotatedTetromino.size();
@@ -169,6 +172,16 @@ bool gameOver(int arena[height][width]) {
     return false;
 }
 
+void hardDrop(int arena[height][width]) {
+    for (int i = height; i > 0; i--) {
+        for (int j = 0; j < width; j++) {
+            if (arena[i][j] == 7) {
+                candrop[j] = i - 1;
+            }
+        }
+    }
+}
+
 int main() {
     srand(time(0));
     int dx = 0;
@@ -216,6 +229,12 @@ int main() {
             randomTetromino = rand() % 7;
             currentTetromino = tetromino[randomTetromino];
         }
+
+        hardDrop(arena);
+        for (int i = 0; i < width; i++) {
+            cout << candrop[i] << " ";
+        }
+        cout << endl;
 
         draw(arena);
         clearLines(arena);
