@@ -34,7 +34,7 @@ vector<vector<int>> rotateMatrix(const vector<vector<int>> &matrix) {
         }
     }
     return rotated;
-}
+} 
 
 // Fungsi untuk memeriksa apakah tetromino bisa diputar
 bool canRotate(int arena[height][width], int position_x, int position_y, vector<vector<int>> &rotatedTetromino) {
