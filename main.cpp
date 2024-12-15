@@ -90,6 +90,8 @@ void draw(int arena[height][width], vector<vector<int>> &nextTetromino) {
                 cout << "@"; // Tetromino
             } else if (arena[i][j] == 2) {
                 cout << "#"; // Border
+            } else if (arena[i][j] == 3) {
+                cout << ".";
             } else {
                 cout << " "; // Arena kosong
             }
@@ -225,13 +227,46 @@ bool gameOver(int arena[height][width]) {
     return false;
 }
 
-void hardDrop(int arena[height][width]) {
+int minn(int arr[], int n) {
+    int low = arr[0];
+    for (int i = 1; i < n; i++) {
+        if (low > arr[i]) {
+            low = arr[i];
+        }
+    }
+    if (low == 0) {
+        low = 19;
+    }
+    return low;
+}
+
+void hardDrop(int arena[height][width], vector<vector<int>> currentTetromino, int position_x, int position_y) {
     for (int i = height; i > 0; i--) {
         for (int j = 0; j < width; j++) {
             if (arena[i][j] == 7) {
-                candrop[j] = i - 1;
+                candrop[j] = i;
             }
         }
+    }
+
+    int height = currentTetromino.size();
+    int width = currentTetromino[0].size();
+    int shadow_y[width];
+    for (int i = 0; i < width; i++) {
+        shadow_y[i] = candrop[position_x + i];
+    }
+    int low = minn(shadow_y, width);
+    for (int i = low - height; i < low; i++) {
+        for (int j = position_x; j < position_x + width; j++) {
+            if (arena[i][j] != 7 && arena[i][j] != 1) {
+                if (arena[position_y - 1][j] == 1) {
+                    arena[i][j] = 3; 
+                } else {
+                     arena[i][j] = 0;
+                }
+            }
+        }
+        position_y++;
     }
 }
 
@@ -285,7 +320,7 @@ int main() {
             nextTetrominoIndex = rand() % 7; // Ambil tetronimo berikutnya
             nextTetromino = tetromino[nextTetrominoIndex]; // Set next tetromino
         }
-
+        hardDrop(arena, currentTetromino, tetromino_x, tetromino_y);
         draw(arena, nextTetromino);
         clearLines(arena);
         Sleep(150);
