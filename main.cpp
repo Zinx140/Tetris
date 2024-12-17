@@ -167,12 +167,12 @@ bool canMove(int arena[height][width], int position_x, int position_y, vector<ve
 }
 
 bool canTurnLeft(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino, int dx) {
-    for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
-            int newHeight = currentTetromino.size();
-            int newWidth = currentTetromino[0].size();
-            for (int i = position_y; i <= position_y + newHeight; i++) {
-                if (arena[i][position_x - 1] == 7) {
+    int newHeight = currentTetromino.size();
+    int newWidth = currentTetromino[0].size();
+    for (int i = 0; i < newHeight; i++) {
+        for (int j = 0; j < newWidth; j++) {
+            if (currentTetromino[i][j] == 1) {
+                if (arena[position_y + i][position_x - 1] == 7) {
                     return false;
                 }
             }
@@ -182,12 +182,12 @@ bool canTurnLeft(int arena[height][width], int position_x, int position_y, vecto
 }
 
 bool canTurnRight(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino, int dx) {
-    for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
-            int newHeight = currentTetromino.size();
-            int newWidth = currentTetromino[0].size();
-            for (int i = position_y; i <= position_y + newHeight; i++) {
-                if (arena[i][position_x + newWidth] == 7) {
+    int newHeight = currentTetromino.size();
+    int newWidth = currentTetromino[0].size();
+    for (int i = 0; i < newHeight; i++) {
+        for (int j = 0; j < newWidth; j++) {
+            if (currentTetromino[i][j] == 1) {
+                if (arena[position_y + i][position_x + newWidth] == 7) {
                     return false;
                 }
             }
