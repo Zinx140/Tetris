@@ -227,19 +227,6 @@ bool gameOver(int arena[height][width]) {
     return false;
 }
 
-int minn(int arr[], int n) {
-    int low = arr[0];
-    for (int i = 1; i < n; i++) {
-        if (low > arr[i]) {
-            low = arr[i];
-        }
-    }
-    if (low == 0) {
-        low = 19;
-    }
-    return low;
-}
-
 void hardDrop(int arena[height][width], vector<vector<int>> currentTetromino, int position_x, int position_y, bool drop, int &temp) {
     while (canMove(arena, position_x, position_y, currentTetromino)) {
         if (canMove(arena, position_x, position_y, currentTetromino)) {
@@ -255,9 +242,6 @@ void hardDrop(int arena[height][width], vector<vector<int>> currentTetromino, in
                 }
             }
             if (drop) {
-                if (arena[position_y + i - 1][position_x + j] == 4) {
-                    arena[position_y + i - 1][position_x + j] = 7;
-                }
                 temp = position_y;
             }
         }
