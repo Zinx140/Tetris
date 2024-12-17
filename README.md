@@ -32,9 +32,9 @@ Cara kerja:
 2. Selanjutnya, buat tetromino dengan ukuran kolom menjadi baris dan baris menjadi kolom (kolom x baris)
 3. Lalu pindah index-index array sesuai dengan loop ini:
    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
-            rotated[j][n - 1 - i] = matrix[i][j];
-        }
+       for (int j = 0; j < m; j++) {
+           rotated[j][n - 1 - i] = matrix[i][j];
+       }
     }  
 
 # PROCEDURE hardDrop - buat agar jika dipencet 's' tetromino nya langsung jatuh 
