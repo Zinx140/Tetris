@@ -90,7 +90,7 @@ void draw(int arena[height][width], vector<vector<int>> &nextTetromino) {
                 cout << "@"; // Tetromino
             } else if (arena[i][j] == 2) {
                 cout << "#"; // Border
-            } else if (arena[i][j] == 3) {
+            } else if (arena[i][j] == 4) {
                 cout << ".";
             } else {
                 cout << " "; // Arena kosong
@@ -149,7 +149,7 @@ void draw(int arena[height][width], vector<vector<int>> &nextTetromino) {
     cout << "'W' to rotate tetromino" << endl;
 }
 
-bool canMove(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino, int dx) {
+bool canMove(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino) {
     int newHeight = currentTetromino.size();
     int newWidth = currentTetromino[0].size();
     for (int i = 0; i < newHeight; i++) {
@@ -241,32 +241,21 @@ int minn(int arr[], int n) {
 }
 
 void hardDrop(int arena[height][width], vector<vector<int>> currentTetromino, int position_x, int position_y) {
-    for (int i = height; i > 0; i--) {
-        for (int j = 0; j < width; j++) {
-            if (arena[i][j] == 7) {
-                candrop[j] = i;
-            }
+    while (canMove(arena, position_x, position_y, currentTetromino)) {
+        if (canMove(arena, position_x, position_y, currentTetromino)) {
+            position_y++;
+//            cout << position_y << endl;
         }
     }
 
-    int height = currentTetromino.size();
-    int width = currentTetromino[0].size();
-    int shadow_y[width];
-    for (int i = 0; i < width; i++) {
-        shadow_y[i] = candrop[position_x + i];
-    }
-    int low = minn(shadow_y, width);
-    for (int i = low - height; i < low; i++) {
-        for (int j = position_x; j < position_x + width; j++) {
-            if (arena[i][j] != 7 && arena[i][j] != 1) {
-                if (arena[position_y - 1][j] == 1) {
-                    arena[i][j] = 3; 
-                } else {
-                     arena[i][j] = 0;
+    for (int i = 0; i < currentTetromino.size(); i++) {
+        for (int j = 0; j < currentTetromino[i].size(); j++) {
+            if (currentTetromino[i][j] == 1) {
+                if (arena[position_y + i - 1][position_x + j] != 1) {
+                    arena[position_y + i - 1][position_x + j] = 4;
                 }
             }
         }
-        position_y++;
     }
 }
 
@@ -282,7 +271,7 @@ int main() {
     int arena[height][width] = {0};
 
     while (!gameOver(arena)) {
-        if (canMove(arena, tetromino_x, tetromino_y, currentTetromino, dx)) {
+        if (canMove(arena, tetromino_x, tetromino_y, currentTetromino)) {
             dx = 0;
             if (kbhit()) {
                 char control = getch();
