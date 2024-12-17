@@ -1,4 +1,4 @@
-# Penjelasan Cara Kerja Tetris 
+# Algoritma Tetris  
 
 # Algoritma Dasar 
   Yang pertama bentuk dulu pakai array atau vector 3D Dimensi 1 isinya untuk randoman bentuk tetromino yang akan keluar, Dimensi 2 dan Dimensi 3 nya berguna
