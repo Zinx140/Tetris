@@ -30,12 +30,7 @@ Cara kerja:
 # PROCEDURE rotateMatrix - untuk memutar bentuk tetromino
 1. Yang pertama cek dulu ukuran tetromino baris x kolom
 2. Selanjutnya, buat tetromino dengan ukuran kolom menjadi baris dan baris menjadi kolom (kolom x baris)
-3. Lalu pindah index-index array sesuai dengan loop ini:
-   for (int i = 0; i < n; i++) {
-       for (int j = 0; j < m; j++) {
-           rotated[j][n - 1 - i] = matrix[i][j];
-       }
-    }  
+3. Lalu pindah index-index array sesuai dengan kondisi yang sudah diputar 
 
 # PROCEDURE hardDrop - buat agar jika dipencet 's' tetromino nya langsung jatuh 
 Cara kerja: 
