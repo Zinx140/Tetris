@@ -34,7 +34,7 @@ vector<vector<int>> rotateMatrix(const vector<vector<int>> &matrix) {
         }
     }
     return rotated;
-} 
+}
 
 // Fungsi untuk memeriksa apakah tetromino bisa diputar
 bool canRotate(int arena[height][width], int position_x, int position_y, vector<vector<int>> &rotatedTetromino) {
@@ -224,61 +224,65 @@ bool gameOver(int arena[height][width]) {
 }
 
 int main_menu() {
-    int control_x = 0; // mulai dari atas untuk 'T' (seharusnya yah aku belum ngetes soalnya, semoga ga rusak :v)
-    char pattern_graph[15][25] = {
-        {'#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'},
-        {'#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#'},
-        {'#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#'},
-        {'#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#'},
-        {'#', ' ', '@', '@', '@', ' ', '@', '@', '@', ' ', '@', '@', '@', ' ', '@', '@', '@', ' ', '@', ' ', '@', '@', '@', ' ', '#'},
-        {'#', ' ', ' ', '@', ' ', ' ', '@', ' ', ' ', ' ', ' ', '@', ' ', ' ', '@', ' ', '@', ' ', '@', ' ', '@', ' ', ' ', ' ', '#'},
-        {'#', ' ', ' ', '@', ' ', ' ', '@', '@', '@', ' ', ' ', '@', ' ', ' ', '@', '@', '@', ' ', '@', ' ', '@', '@', '@', ' ', '#'},
-        {'#', ' ', ' ', '@', ' ', ' ', '@', ' ', ' ', ' ', ' ', '@', ' ', ' ', '@', '@', ' ', ' ', '@', ' ', ' ', ' ', '@', ' ', '#'},
-        {'#', ' ', ' ', '@', ' ', ' ', '@', '@', '@', ' ', ' ', '@', ' ', ' ', '@', ' ', '@', ' ', '@', ' ', '@', '@', '@', ' ', '#'},
-        {'#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#'},
-        {'#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#'},
-        {'#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#'},
-        {'#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'}
-    };
-
+    int control_x = 0; // Position of ">"
     string arr_mainmenu[3] = {"Play", "Leaderboard", "Exit"};
     char input;
+    const int menu_size = 3;
+
+    // Get console window dimensions
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    int console_width, console_height; //idk how tf does this even work, don't bother asking me
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    console_width = csbi.dwSize.X;
+    console_height = csbi.dwSize.Y;
+
+    const int menu_width = 60; // menu width
 
     do {
         system("cls");
 
-        // Print pattern
-        for (int i = 0; i < 15; i++) {
-            for (int j = 0; j < 25; j++) {
-                cout << pattern_graph[i][j];
-            }
-            cout << endl;
-        }
+        // hitung horizontal padding
+        string horizontal_padding((console_width - menu_width) / 2, ' '); // Spaces for horizontal centering
 
+        cout << horizontal_padding << "############################################################" << endl;
+        cout << horizontal_padding << "#                                                          #" << endl;
+        cout << horizontal_padding << "#        @@@@@@  @@@@@  @@@@@@  @@@@  @@  @@@@@@@          #" << endl;
+        cout << horizontal_padding << "#        @@@@@@  @      @@@@@@  @  @  @@  @@               #" << endl;
+        cout << horizontal_padding << "#          @@    @@@@@    @@    @@@@  @@  @@@@@@@          #" << endl;
+        cout << horizontal_padding << "#          @@    @@@@@    @@    @@    @@  @@@@@@@          #" << endl;
+        cout << horizontal_padding << "#          @@    @        @@    @ @   @@       @@          #" << endl;
+        cout << horizontal_padding << "#          @@    @@@@@    @@    @  @  @@  @@@@@@@          #" << endl;
+        cout << horizontal_padding << "#                                                          #" << endl;
 
-        // 'T' untuk kontrolnya
-        for (int i = 0; i < 3; i++) {
-            if (i == control_x) {
-                cout << "T " << arr_mainmenu[i] << endl;
+        // kontrol untuk optionya
+        for (int i = 0; i < menu_size; i++) {
+            cout << horizontal_padding << "#               ";
+            if (control_x == i) {
+                cout << "> " << arr_mainmenu[i];
             } else {
-                cout << "  " << arr_mainmenu[i] << endl;
+                cout << "  " << arr_mainmenu[i];
             }
+            cout << string(41 - arr_mainmenu[i].length(), ' ') << "#" << endl;
         }
 
-        cout << endl;
-        cout << "Press W or S to move, press ENTER to choose"; //instruction
+        cout << horizontal_padding << "#                                                          #" << endl;
+        cout << horizontal_padding << "#       Press W or S to move, press ENTER to choose        #" << endl;
+        cout << horizontal_padding << "############################################################" << endl;
 
-        // Get user input
         input = _getch();
-        if (input == 'w' && control_x > 0) {
-            control_x--; // Move up
-        } else if (input == 's' && control_x < 2) {
-            control_x++; // Move down
+        if (input == 'w' || input == 'W') {
+            if (control_x > 0) control_x--; // Move up
+        } else if (input == 's' || input == 'S') {
+            if (control_x < menu_size - 1) control_x++; // Move down
         }
 
-    } while (input != '\r'); // Exit on Enter key
+    } while (input != '\r'); // ini adalah ascii untuk 'ENTER', dia berhenti kalo enter di tekan
+
     return control_x;
 }
+
+
+
 
 int main() {
     srand(time(0));
