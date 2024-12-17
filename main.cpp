@@ -4,7 +4,7 @@
 #include <windows.h>
 #include <time.h>
 #include <vector>
-
+// sudah jalan cuma menunya tak tahan dulu soalnya rusak >3
 using namespace std;
 
 // Ukuran arena
@@ -79,22 +79,77 @@ void summonTetromino(int arena[height][width], int position_x, int position_y, v
 }
 
 // Fungsi untuk menggambar arena
-void draw(int arena[height][width]) {
+void draw(int arena[height][width], vector<vector<int>> &nextTetromino) {
+    const int boxHeight = 4;
+    const int boxWidth = 4;
+    const int horizontalSpacing = 5; // Spacing diantara arena dan "Next Tetromino"
+
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             if (arena[i][j] == 1 || arena[i][j] == 7) {
                 cout << "@"; // Tetromino
             } else if (arena[i][j] == 2) {
                 cout << "#"; // Border
+            } else if (arena[i][j] == 4) {
+                cout << ".";
             } else {
                 cout << " "; // Arena kosong
             }
         }
+
+        // Spacing diantara arena dan "Next Tetromino"
+        cout << string(horizontalSpacing, ' ');
+
+        // Print "Next Tetromino" label di atas kotak
+        if (i == (height / 2 - boxHeight / 2 - 2)) {
+            // Center
+            int labelPadding = max(0, (boxWidth - 15) / 2);
+            cout << string(labelPadding, ' ') << "Next Tetromino:";
+        }
+
+        // Print "Next Tetromino" box baris per baris
+        if (i >= (height / 2 - boxHeight / 2) && i < (height / 2 + boxHeight / 2)) {
+            int tetrominoRow = i - (height / 2 - boxHeight / 2); // Calculate current row untuk tetromino
+
+            // left border
+            cout << "#";
+
+            if (tetrominoRow < nextTetromino.size()) {
+                // Center tetromino dalam box 4x4
+                int paddingLeft = (boxWidth - nextTetromino[tetrominoRow].size()) / 2;
+                int paddingRight = boxWidth - nextTetromino[tetrominoRow].size() - paddingLeft;
+
+                // Print left padding, tetromino contents, dan right padding
+                cout << string(paddingLeft, ' ');
+                for (int j = 0; j < nextTetromino[tetrominoRow].size(); j++) {
+                    if (nextTetromino[tetrominoRow][j] == 1) {
+                        cout << "@";
+                    } else {
+                        cout << " ";
+                    }
+                }
+                cout << string(paddingRight, ' ');
+            } else {
+                cout << string(boxWidth, ' ');
+            }
+
+            // box's right border
+            cout << "#";
+        } else if (i == (height / 2 - boxHeight / 2 - 1) || i == (height / 2 + boxHeight / 2)) {
+            cout << string(boxWidth + 2, '#'); // Full-width border
+        }
+
         cout << endl;
     }
+
+    // instructions
+    cout << endl;
+    cout << "'A' to move tetromino to the left" << endl;
+    cout << "'D' to move tetromino to the right" << endl;
+    cout << "'W' to rotate tetromino" << endl;
 }
 
-bool canMove(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino, int dx) {
+bool canMove(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino) {
     int newHeight = currentTetromino.size();
     int newWidth = currentTetromino[0].size();
     for (int i = 0; i < newHeight; i++) {
@@ -116,7 +171,7 @@ bool canTurnLeft(int arena[height][width], int position_x, int position_y, vecto
         for (int j = 0; j < width; j++) {
             int newHeight = currentTetromino.size();
             int newWidth = currentTetromino[0].size();
-            for (int i = position_y; i <= position_y + newHeight + 1; i++) {
+            for (int i = position_y; i <= position_y + newHeight; i++) {
                 if (arena[i][position_x - 1] == 7) {
                     return false;
                 }
@@ -131,7 +186,7 @@ bool canTurnRight(int arena[height][width], int position_x, int position_y, vect
         for (int j = 0; j < width; j++) {
             int newHeight = currentTetromino.size();
             int newWidth = currentTetromino[0].size();
-            for (int i = position_y; i <= position_y + newHeight + 1; i++) {
+            for (int i = position_y; i <= position_y + newHeight; i++) {
                 if (arena[i][position_x + newWidth] == 7) {
                     return false;
                 }
@@ -172,11 +227,38 @@ bool gameOver(int arena[height][width]) {
     return false;
 }
 
-void hardDrop(int arena[height][width]) {
-    for (int i = height; i > 0; i--) {
-        for (int j = 0; j < width; j++) {
-            if (arena[i][j] == 7) {
-                candrop[j] = i - 1;
+int minn(int arr[], int n) {
+    int low = arr[0];
+    for (int i = 1; i < n; i++) {
+        if (low > arr[i]) {
+            low = arr[i];
+        }
+    }
+    if (low == 0) {
+        low = 19;
+    }
+    return low;
+}
+
+void hardDrop(int arena[height][width], vector<vector<int>> currentTetromino, int position_x, int position_y, bool drop, int &temp) {
+    while (canMove(arena, position_x, position_y, currentTetromino)) {
+        if (canMove(arena, position_x, position_y, currentTetromino)) {
+            position_y++;
+        }
+    }
+
+    for (int i = 0; i < currentTetromino.size(); i++) {
+        for (int j = 0; j < currentTetromino[i].size(); j++) {
+            if (currentTetromino[i][j] == 1) {
+                if (arena[position_y + i - 1][position_x + j] != 1 && arena[position_y + i - 1][position_x + j] != 7 && arena[position_y + i - 1][position_x + j] != 2) {
+                    arena[position_y + i - 1][position_x + j] = 4;
+                }
+            }
+            if (drop) {
+                if (arena[position_y + i - 1][position_x + j] == 4) {
+                    arena[position_y + i - 1][position_x + j] = 7;
+                }
+                temp = position_y;
             }
         }
     }
@@ -188,11 +270,16 @@ int main() {
     int tetromino_y = 1;
     int tetromino_x = rand() % 19 + 1;
     int randomTetromino = rand() % 7;
-    vector<vector<int>> currentTetromino = tetromino[randomTetromino];
+    vector<vector<int>> currentTetromino = tetromino[randomTetromino]; // vector current tetronimo
+    int nextTetrominoIndex = rand() % 7; // Index untuk tetronimo berikutnya
+    vector<vector<int>> nextTetromino = tetromino[nextTetrominoIndex]; // vector next tetronimo
     int arena[height][width] = {0};
+    bool flag = true;
+    int tempY;
 
     while (!gameOver(arena)) {
-        if (canMove(arena, tetromino_x, tetromino_y, currentTetromino, dx)) {
+        bool drop = false;
+        if (canMove(arena, tetromino_x, tetromino_y, currentTetromino) && flag) {
             dx = 0;
             if (kbhit()) {
                 char control = getch();
@@ -211,12 +298,26 @@ int main() {
                     if (canRotate(arena, tetromino_x, tetromino_y, rotatedTetromino)) {
                         currentTetromino = rotatedTetromino;
                     }
+                } else if (control == 's') {
+                    drop = true;
+                    flag = false;
                 }
             }
 
             summonTetromino(arena, tetromino_x, tetromino_y, currentTetromino);
             tetromino_y++;
         } else {
+            if (!flag) {
+                for (int i = 0; i < currentTetromino.size(); i++) {
+                    for (int j = 0; j < currentTetromino[0].size(); j++) {
+                        if (currentTetromino[i][j] == 1) {
+                            arena[tetromino_y + i - 1][tetromino_x + j] = 0;
+                        }
+                    }
+                }
+                tetromino_y = tempY;
+            }
+
             for (int i = 0; i < currentTetromino.size(); i++) {
                 for (int j = 0; j < currentTetromino[i].size(); j++) {
                     if (currentTetromino[i][j] == 1) {
@@ -224,19 +325,17 @@ int main() {
                     }
                 }
             }
+
+
             tetromino_y = 1;
             tetromino_x = rand() % 19 + 1;
-            randomTetromino = rand() % 7;
-            currentTetromino = tetromino[randomTetromino];
+            currentTetromino = nextTetromino; // Set current tetromino to the next one
+            nextTetrominoIndex = 2; // Ambil tetronimo berikutnya
+            nextTetromino = tetromino[nextTetrominoIndex]; // Set next tetromino
+            flag = true;
         }
-
-        hardDrop(arena);
-        for (int i = 0; i < width; i++) {
-            cout << candrop[i] << " ";
-        }
-        cout << endl;
-
-        draw(arena);
+        hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY);
+        draw(arena, nextTetromino);
         clearLines(arena);
         Sleep(150);
         system("cls"); // Bersihkan layar untuk menggambar ulang
