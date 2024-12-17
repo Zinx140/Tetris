@@ -7,15 +7,18 @@ ketika tetromino nya menyentuh tanah saya menyalin isi tetromino yang isinya 1 k
 peta integer karena mudah saat mengatur atau dalam pengecekan input nya karena kalau string nulis petik dua ("") sungguh menjengkelkan oleh karena itu kita memakai 
 prosedur Draw untuk menggambar game kita
 
-# FUNCTION draw - buat ngegambar aja
-
 # FUNCTION canMove - buat ngecek kapan si tetromino berhenti jatuh 
 Cara kerja:
 1. Yang pertama aku buat loop untuk mengamvil tetromino yang isinya 1 dulu lalu kita ikuti pergerakan turun nya seperti normal nya
 2. Kalau salah satu bagian tetromino yang berisi angka 1 sudah menyentuh tanah sehingga kalau sudah nyentuh tanah dia bakal berhentiin
    loop yang ada di main dan main sendiri akan menggambar nya di posisi sebelum menyentuh tanah nya
 
-# FUNCTION canTurnLeft dan canTurnRight - untuk mengecek apakah bisa geser ke kanan dan ke kiri karena bisa saja tembus atau berhenti
+# FUNCTION canTurnLeft dan canTurnRight - untuk pengecekan gerak kanan atau kiri 
+Cara kerja:
+1. Pertama kita loop bentuk tetromino
+2. Untuk tetromino yang berisi 1 aku tambah dengan posisi Y nya dan jika di kiri atau kanan sudah ada
+   balok tetromino lain maka function ini akan melarang kbhit() atau melarang player bergerak kanan atau kiri
+-- Note: "Disini saya memisah function untuk pengecekan kiri atau kanan agar tidak ribet saja" --
 
 # FUNCTION hardDrop - buat agar jika dipencet 's' tetromino nya langsung jatuh 
 Cara kerja: 
