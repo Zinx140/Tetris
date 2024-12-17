@@ -330,7 +330,7 @@ int main() {
             tetromino_y = 1;
             tetromino_x = rand() % 19 + 1;
             currentTetromino = nextTetromino; // Set current tetromino to the next one
-            nextTetrominoIndex = 2; // Ambil tetronimo berikutnya
+            nextTetrominoIndex = rand() % 7; // Ambil tetronimo berikutnya
             nextTetromino = tetromino[nextTetrominoIndex]; // Set next tetromino
             flag = true;
         }
