@@ -29,13 +29,15 @@ void setColor(int color) {
     SetConsoleTextAttribute(hConsole, color);
 }
 
+int arenaColors[height][width] = {0};
+
 // set warnanya ganti aja angkanya kalo mau ganti warna (1-15)
 int tetrominoColors[7] = {
-    9,  // I - Blue
-    14, // O - Yellow
+    9,  // I - Light-Blue
+    12, // O - Light-Red
     13, // T - Magenta
     6,  // L - Light Red
-    3,  // J - Cyan
+    3,  // J - Aqua
     2,  // S - Green
     4   // Z - Red
 };
@@ -72,7 +74,7 @@ bool canRotate(int arena[height][width], int position_x, int position_y, vector<
 }
 
 // Fungsi untuk menggambar tetromino di dalam arena
-void summonTetromino(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino) {
+void summonTetromino(int arena[height][width], int arenaColors[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino, int colorIndex) {
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             if (i == 0 || j == 0 || i == height - 1 || j == width - 1) {
@@ -80,6 +82,7 @@ void summonTetromino(int arena[height][width], int position_x, int position_y, v
             } else {
                 if (arena[i][j] != 7) {
                     arena[i][j] = 0; // Arena kosong
+                    arenaColors[i][j] = 0; // Reset color
                 }
             }
         }
@@ -88,13 +91,14 @@ void summonTetromino(int arena[height][width], int position_x, int position_y, v
         for (int j = 0; j < currentTetromino[i].size(); j++) {
             if (currentTetromino[i][j] == 1) {
                 arena[position_y + i][position_x + j] = currentTetromino[i][j];
+                arenaColors[position_y + i][position_x + j] = tetrominoColors[colorIndex];
             }
         }
     }
 }
 
 // Fungsi untuk menggambar arena
-void draw(int arena[height][width], vector<vector<int>> &nextTetromino, int currentTetrominoIndex, int nextTetrominoIndex) {
+void draw(int arena[height][width], int arenaColors[height][width], vector<vector<int>> &nextTetromino, int currentTetrominoIndex, int nextTetrominoIndex) {
     const int boxHeight = 4;
     const int boxWidth = 4;
     const int horizontalSpacing = 5;
@@ -102,7 +106,7 @@ void draw(int arena[height][width], vector<vector<int>> &nextTetromino, int curr
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             if (arena[i][j] == 1 || arena[i][j] == 7) {
-                setColor(tetrominoColors[currentTetrominoIndex]); // ngeset warna tetromino
+                setColor(arenaColors[i][j]); // ngeset warna tetromino
                 cout << "@";
                 setColor(7); // Reset color ke default
             } else if (arena[i][j] == 2) {
@@ -330,13 +334,14 @@ int main() {
                 }
             }
 
-            summonTetromino(arena, tetromino_x, tetromino_y, currentTetromino);
+            summonTetromino(arena, arenaColors, tetromino_x, tetromino_y, currentTetromino, randomTetromino);
             tetromino_y++;
         } else {
             for (int i = 0; i < currentTetromino.size(); i++) {
                 for (int j = 0; j < currentTetromino[i].size(); j++) {
                     if (currentTetromino[i][j] == 1) {
                         arena[tetromino_y + i - 1][tetromino_x + j] = 7;
+                        arenaColors[tetromino_y + i - 1][tetromino_x + j] = tetrominoColors[randomTetromino];
                     }
                 }
             }
@@ -349,7 +354,7 @@ int main() {
 
         }
 
-        draw(arena, nextTetromino, randomTetromino, nextTetrominoIndex);
+        draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex);
         clearLines(arena);
         Sleep(150);
         system("cls"); // Bersihkan layar untuk menggambar ulang
