@@ -356,7 +356,7 @@ int main() {
 
         draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex);
         clearLines(arena);
-        Sleep(150);
+        Sleep(150); 
         system("cls"); // Bersihkan layar untuk menggambar ulang
     }
 
