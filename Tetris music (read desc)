@@ -323,6 +323,23 @@ int main_menu() {
     return control_x;
 }
 
+bool playBackgroundMusic() {
+    try {
+        sf::Music* music = new sf::Music();
+        if (!music->openFromFile("music/MainTheme.wav")) {
+            cout << "Error: Could not load music file" << endl;
+            return false;
+        }
+        music->setVolume(50);
+        music->setLoop(true);
+        music->play();
+        return true;
+    } catch (const exception& e) {
+        cout << "Error playing music: " << e.what() << endl;
+        return false;
+    }
+}
+
 int main() {
     srand(time(0));
 
@@ -330,7 +347,7 @@ int main() {
         int selection = main_menu();
 
         if (selection==0){ //if selection==0, then start game!
-
+    playBackgroundMusic
     int dx = 0;
     int tetromino_y = 1;
     int tetromino_x = rand() % 19 + 1;
