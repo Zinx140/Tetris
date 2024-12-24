@@ -347,7 +347,7 @@ int main() {
         int selection = main_menu();
 
         if (selection==0){ //if selection==0, then start game!
-    playBackgroundMusic
+    playBackgroundMusic()
     int dx = 0;
     int tetromino_y = 1;
     int tetromino_x = rand() % 19 + 1;
