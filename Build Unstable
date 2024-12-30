@@ -22,6 +22,9 @@ string playerName;
 vector<string> playerNames;
 vector<int> scores;
 
+//static sf::SoundBuffer buffer;
+//static sf::Sound sound;
+
 // Tetromino menggunakan vector
 vector<vector<vector<int>>> tetromino = {
     {{1, 1, 1, 1}},                  // I
@@ -32,6 +35,18 @@ vector<vector<vector<int>>> tetromino = {
     {{0, 1, 1}, {1, 1, 0}},          // S
     {{1, 1, 0}, {0, 1, 1}}           // Z
 };
+
+//void playSound(const string& filename, float volume=100.0f) {
+//
+//    if (!buffer.loadFromFile(filename)) {
+//        std::cerr << "Error loading sound file: " << filename << std::endl;
+//        return;
+//    }
+//
+//    sound.setBuffer(buffer);
+//    sound.setVolume(volume);
+//    sound.play();
+//}
 
 void setColor(int color) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -276,9 +291,9 @@ void hardDrop(int arena[height][width], vector<vector<int>> currentTetromino, in
 
 int main_menu() {
     int control_x = 0; // Position of ">"
-    string arr_mainmenu[4] = {"Play", "Leaderboard", "Option", "Exit"};
+    string arr_mainmenu[3] = {"Play", "Leaderboard", "Exit"};
     char input;
-    const int menu_size = 4;
+    const int menu_size = 3;
 
     // Get console window dimensions
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -322,13 +337,20 @@ int main_menu() {
 
         input = _getch();
         if (input == 'w' || input == 'W') {
-            if (control_x > 0) control_x--; // Move up
+            if (control_x > 0){
+                control_x--; // Move up
+//                playSound("sfx/move.ogg");
+            }
         } else if (input == 's' || input == 'S') {
-            if (control_x < menu_size - 1) control_x++; // Move down
+            if (control_x < menu_size - 1){
+                control_x++; // Move down
+//                playSound("sfx/move.ogg");
+            }
         }
 
     } while (input != '\r'); // ini adalah ascii untuk 'ENTER', dia berhenti kalo enter di tekan
 
+//    playSound("sfx/select.ogg");
     return control_x;
 }
 
