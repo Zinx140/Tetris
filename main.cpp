@@ -714,7 +714,7 @@ void runGame(int bossHealth, int interval) {
             tetromino_x = rand() % 19 + 1;
             randomTetromino = nextTetrominoIndex; // Update the current Tetromino index
             currentTetromino = nextTetromino;
-            nextTetrominoIndex = rand() % 7;     // Generate tindex tetronimo berikutnya
+            nextTetrominoIndex = rand() % 7;     // Generate index tetronimo berikutnya
             nextTetromino = tetromino[nextTetrominoIndex]; // Set next Tetromino
             muteMove = true;
             flag = true;
