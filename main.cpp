@@ -602,7 +602,8 @@ void runGame(int bossHealth, int interval) {
     vector<vector<int>> nextTetromino = tetromino[nextTetrominoIndex]; // vector next tetronimo
     int arena[height][width] = {0};
     bool flag = true;
-    int tempY, counter = 1;
+    int tempY, counter = 1; // counter buat ngitung detik atau ms
+    // jadi interval boss nyerang itu nanti rumus nya counter % interval
     score = 0;
 
     system("cls");
@@ -648,7 +649,7 @@ void runGame(int bossHealth, int interval) {
                 tetromino_y++;
             }
 
-            if (counter % interval == 0) {
+            if (counter % interval == 0) { // interval kapan boss nyerang
                 int randomSkill = rand() % 2 + 1;
                 if (randomSkill == 1) {
                     currentTetromino = tetromino[rand() % 7];
@@ -688,7 +689,7 @@ void runGame(int bossHealth, int interval) {
             flag = true;
         }
 
-        counter++;
+        counter++; // buat nambah detik
         cout << "Boss Health: " << bossHealth << endl;
         hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
         draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex);
