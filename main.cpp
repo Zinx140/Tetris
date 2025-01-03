@@ -494,6 +494,15 @@ void showLeaderboard() {
     getch();
 }
 
+bool canRandom(int randomTetromino, int arena[height][width], int positionX, int positionY) {
+    vector<vector<int>> currentTetromino = tetromino[randomTetromino];
+    if (canMove(arena, positionX, positionY, currentTetromino)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void runNormalGame() {
     int dx = 0;
     int tetromino_y = 1;
@@ -601,8 +610,10 @@ void runGame(int bossHealth, int interval) {
     int nextTetrominoIndex = rand() % 7; // Index untuk tetronimo berikutnya
     vector<vector<int>> nextTetromino = tetromino[nextTetrominoIndex]; // vector next tetronimo
     int arena[height][width] = {0};
-    bool flag = true;
-    int tempY, counter = 1; // counter buat ngitung detik atau ms
+    bool flag = true, muteMove = true;
+    int limitHealth = bossHealth;
+    string skillName;
+    int tempY, randomSkill, counter = 1; // counter buat ngitung detik atau ms
     // jadi interval boss nyerang itu nanti rumus nya counter % interval
     score = 0;
 
@@ -622,24 +633,34 @@ void runGame(int bossHealth, int interval) {
             dx = 0;
             if (kbhit()) {
                 char control = getch();
-                if (control == 'a') {
-                    if (tetromino_x > 1 && canTurnLeft(arena, tetromino_x, tetromino_y, currentTetromino, dx)) {
-                        dx = -1;
-                        tetromino_x += dx;
+
+                if (muteMove) {
+
+                    if (control == 'a') {
+                        if (tetromino_x > 1 && canTurnLeft(arena, tetromino_x, tetromino_y, currentTetromino, dx)) {
+                            dx = -1;
+                            tetromino_x += dx;
+                        }
+                    } else if (control == 'd') {
+                        if (tetromino_x + currentTetromino[0].size() < width - 1 && canTurnRight(arena, tetromino_x, tetromino_y, currentTetromino, dx)) {
+                            dx = 1;
+                            tetromino_x += dx;
+                        }
+                    } else if (control == 'w') { // Rotasi
+                        vector<vector<int>> rotatedTetromino = rotateMatrix(currentTetromino);
+                        if (canRotate(arena, tetromino_x, tetromino_y, rotatedTetromino)) {
+                            currentTetromino = rotatedTetromino;
+                        }
+                    } else if (control == 's') {
+                        drop = true;
+                        flag = false;
                     }
-                } else if (control == 'd') {
-                    if (tetromino_x + currentTetromino[0].size() < width - 1 && canTurnRight(arena, tetromino_x, tetromino_y, currentTetromino, dx)) {
-                        dx = 1;
-                        tetromino_x += dx;
+
+                } else {
+                    if (control == 's') {
+                        drop = true;
+                        flag = false;
                     }
-                } else if (control == 'w') { // Rotasi
-                    vector<vector<int>> rotatedTetromino = rotateMatrix(currentTetromino);
-                    if (canRotate(arena, tetromino_x, tetromino_y, rotatedTetromino)) {
-                        currentTetromino = rotatedTetromino;
-                    }
-                } else if (control == 's') {
-                    drop = true;
-                    flag = false;
                 }
             }
 
@@ -650,12 +671,21 @@ void runGame(int bossHealth, int interval) {
             }
 
             if (counter % interval == 0) { // interval kapan boss nyerang
-                int randomSkill = rand() % 2 + 1;
-                if (randomSkill == 1) {
-                    currentTetromino = tetromino[rand() % 7];
-                } else {
+                int changeTetromino = rand() % 7;
+                muteMove = true;
+                do {
+                    randomSkill = rand() % 4 + 1;
+                } while((randomSkill == 3 && bossHealth + 50 > limitHealth) || (randomSkill == 1 && !canRandom(changeTetromino, arena, tetromino_x, tetromino_y)));
+
+                if (randomSkill == 1) { // Skill1: ngubah bentuk tetromino
+                    currentTetromino = tetromino[changeTetromino];
+                } else if (randomSkill == 2) { // Skill2: Langsung jatuhin Tetromino
                     drop = true;
                     flag = false;
+                } else if (randomSkill == 3) { // Skill3: Nambah darah boss
+                    bossHealth += 50;
+                } else { // Skill4: blokir player move
+                    muteMove = false;
                 }
             }
 
@@ -686,6 +716,7 @@ void runGame(int bossHealth, int interval) {
             currentTetromino = nextTetromino;
             nextTetrominoIndex = rand() % 7;     // Generate tindex tetronimo berikutnya
             nextTetromino = tetromino[nextTetrominoIndex]; // Set next Tetromino
+            muteMove = true;
             flag = true;
         }
 
@@ -709,9 +740,9 @@ int main() {
     while (true){
         int selection = main_menu();
         if (selection==0) { //if selection==0, then start game!
-            int easy = 3000, intervalEasy = 60;
+            int easy = 3000, intervalEasy = 60; // easy, medium,
             int medium = 4500, intervalMed = 45;
-            int hard = 6000, intervalHard = 30;
+            int hard = 6000, intervalHard = 5;
 //            runNormalGame();
             runGame(easy, intervalEasy);
         } else if (selection==1){
