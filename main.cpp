@@ -219,6 +219,30 @@ bool canTurnRight(int arena[height][width], int position_x, int position_y, vect
     return true;
 }
 
+void clearLines(int arena[height][width], int &bossHealth) {
+    for (int i = 1; i < height - 1; i++) {
+        bool fullLine = true;
+        for (int j = 1; j < width - 1; j++) {
+            if (arena[i][j] != 7) {
+                fullLine = false;
+                break;
+            }
+        }
+        if (fullLine) {
+            score += 100;
+            bossHealth -= 100;
+            for (int j = 1; j < width - 1; j++) {
+                arena[i][j] = 0;
+            }
+            for (int k = i; k > 1; k--) {
+                for (int j = 1; j < width - 1; j++) {
+                    arena[k][j] = arena[k - 1][j];
+                }
+            }
+        }
+    }
+}
+
 void clearLines(int arena[height][width]) {
     for (int i = 1; i < height - 1; i++) {
         bool fullLine = true;
@@ -241,6 +265,7 @@ void clearLines(int arena[height][width]) {
         }
     }
 }
+
 
 bool gameOver(int arena[height][width]) {
     for (int j = 1; j < width - 1; j++) {
@@ -469,14 +494,7 @@ void showLeaderboard() {
     getch();
 }
 
-int main() {
-    srand(time(0));
-
-    while (true){
-        int selection = main_menu();
-
-        if (selection==0){ //if selection==0, then start game!
-
+void runNormalGame() {
     int dx = 0;
     int tetromino_y = 1;
     int tetromino_x = rand() % 19 + 1;
@@ -486,7 +504,7 @@ int main() {
     vector<vector<int>> nextTetromino = tetromino[nextTetrominoIndex]; // vector next tetronimo
     int arena[height][width] = {0};
     bool flag = true;
-    int tempY;
+    int tempY, counter = 0;
     score = 0;
 
     system("cls");
@@ -527,7 +545,10 @@ int main() {
             }
 
             summonTetromino(arena, arenaColors, tetromino_x, tetromino_y, currentTetromino, randomTetromino);
-            tetromino_y++;
+
+            if (counter % 4 == 0) {
+                tetromino_y++;
+            }
         } else {
             if (!flag) {
                 for (int i = 0; i < currentTetromino.size(); i++) {
@@ -558,18 +579,140 @@ int main() {
             flag = true;
         }
 
+        counter++;
         hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
         draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex);
         clearLines(arena);
-        Sleep(150);
+        Sleep(100);
         system("cls"); // Bersihkan layar untuk menggambar ulang
     }
 
     cout << "Game Over!" << endl;
-    loadScores();
     saveScore(score, playerName);
     Sleep(2000);
+}
 
+void runGame(int bossHealth, int interval) {
+    int dx = 0;
+    int tetromino_y = 1;
+    int tetromino_x = rand() % 19 + 1;
+    int randomTetromino = rand() % 7;
+    vector<vector<int>> currentTetromino = tetromino[randomTetromino]; // vector current tetronimo
+    int nextTetrominoIndex = rand() % 7; // Index untuk tetronimo berikutnya
+    vector<vector<int>> nextTetromino = tetromino[nextTetrominoIndex]; // vector next tetronimo
+    int arena[height][width] = {0};
+    bool flag = true;
+    int tempY, counter = 1;
+    score = 0;
+
+    system("cls");
+
+    cout << "Enter Your Name : ";
+    cin >> playerName;
+
+    cout << "Have Fun Playing!" << endl;
+    Sleep(1500);
+
+    system("cls");
+
+    while (!gameOver(arena)) {
+        bool drop = false;
+        if (canMove(arena, tetromino_x, tetromino_y, currentTetromino) && flag) {
+            dx = 0;
+            if (kbhit()) {
+                char control = getch();
+                if (control == 'a') {
+                    if (tetromino_x > 1 && canTurnLeft(arena, tetromino_x, tetromino_y, currentTetromino, dx)) {
+                        dx = -1;
+                        tetromino_x += dx;
+                    }
+                } else if (control == 'd') {
+                    if (tetromino_x + currentTetromino[0].size() < width - 1 && canTurnRight(arena, tetromino_x, tetromino_y, currentTetromino, dx)) {
+                        dx = 1;
+                        tetromino_x += dx;
+                    }
+                } else if (control == 'w') { // Rotasi
+                    vector<vector<int>> rotatedTetromino = rotateMatrix(currentTetromino);
+                    if (canRotate(arena, tetromino_x, tetromino_y, rotatedTetromino)) {
+                        currentTetromino = rotatedTetromino;
+                    }
+                } else if (control == 's') {
+                    drop = true;
+                    flag = false;
+                }
+            }
+
+            summonTetromino(arena, arenaColors, tetromino_x, tetromino_y, currentTetromino, randomTetromino);
+
+            if (counter % 4 == 0) {
+                tetromino_y++;
+            }
+
+            if (counter % interval == 0) {
+                int randomSkill = rand() % 2 + 1;
+                if (randomSkill == 1) {
+                    currentTetromino = tetromino[rand() % 7];
+                } else {
+                    drop = true;
+                    flag = false;
+                }
+            }
+
+        } else {
+            if (!flag) {
+                for (int i = 0; i < currentTetromino.size(); i++) {
+                    for (int j = 0; j < currentTetromino[0].size(); j++) {
+                        if (currentTetromino[i][j] == 1) {
+                            arena[tetromino_y + i - 1][tetromino_x + j] = 0;
+                        }
+                    }
+                }
+                tetromino_y = tempY;
+            }
+
+            for (int i = 0; i < currentTetromino.size(); i++) {
+                for (int j = 0; j < currentTetromino[i].size(); j++) {
+                    if (currentTetromino[i][j] == 1) {
+                        arena[tetromino_y + i - 1][tetromino_x + j] = 7;
+                        arenaColors[tetromino_y + i - 1][tetromino_x + j] = tetrominoColors[randomTetromino];
+                    }
+                }
+            }
+
+            tetromino_y = 1;
+            tetromino_x = rand() % 19 + 1;
+            randomTetromino = nextTetrominoIndex; // Update the current Tetromino index
+            currentTetromino = nextTetromino;
+            nextTetrominoIndex = rand() % 7;     // Generate tindex tetronimo berikutnya
+            nextTetromino = tetromino[nextTetrominoIndex]; // Set next Tetromino
+            flag = true;
+        }
+
+        counter++;
+        cout << "Boss Health: " << bossHealth << endl;
+        hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
+        draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex);
+        clearLines(arena, bossHealth);
+        Sleep(100);
+        system("cls"); // Bersihkan layar untuk menggambar ulang
+    }
+
+    cout << "Game Over!" << endl;
+    Sleep(2000);
+}
+
+int main() {
+    srand(time(0));
+    loadScores();
+
+    while (true){
+        int selection = main_menu();
+        if (selection==0) { //if selection==0, then start game!
+            int easy = 3000, intervalEasy = 60;
+            int medium = 4500, intervalMed = 45;
+            int hard = 6000, intervalHard = 30;
+//            runNormalGame();
+            runGame(easy, intervalEasy);
         } else if (selection==1){
             showLeaderboard();
         } else if (selection==2){
