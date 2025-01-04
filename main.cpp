@@ -6,14 +6,19 @@
 #include <vector>
 #include <conio.h>
 #include <windows.h>
-//#include <mmsystem.h>
-//#include <SFML/Audio.hpp>
+#include <fstream>
+#include <algorithm>
+#include <iomanip>
 
 using namespace std;
 
 // Ukuran arena
 const int width = 25;
 const int height = 20;
+int score = 0;
+string playerName;
+vector<string> playerNames;
+vector<int> scores;
 
 // Tetromino menggunakan vector
 vector<vector<vector<int>>> tetromino = {
@@ -25,6 +30,12 @@ vector<vector<vector<int>>> tetromino = {
     {{0, 1, 1}, {1, 1, 0}},          // S
     {{1, 1, 0}, {0, 1, 1}}           // Z
 };
+
+void playSound(const string &filename) {
+    if (!PlaySound(filename.c_str(), NULL, SND_FILENAME | SND_ASYNC)) {
+        cerr << "Error playing sound: " << filename << endl;
+    }
+}
 
 void setColor(int color) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -158,9 +169,10 @@ void draw(int arena[height][width], int arenaColors[height][width], vector<vecto
 
     // Instructions
     cout << endl;
-    cout << "'A' to move tetromino to the left" << endl;
-    cout << "'D' to move tetromino to the right" << endl;
-    cout << "'W' to rotate tetromino" << endl;
+    cout << "'A' to Move tetromino to the left" << endl;
+    cout << "'D' to Move tetromino to the right" << endl;
+    cout << "'W' to Rotate tetromino" << endl;
+    cout << "'S' to Drop the tetromino" << endl;
 }
 
 
@@ -221,6 +233,7 @@ void clearLines(int arena[height][width]) {
             }
         }
         if (fullLine) {
+            score += 100;
             for (int j = 1; j < width - 1; j++) {
                 arena[i][j] = 0;
             }
@@ -313,32 +326,167 @@ int main_menu() {
 
         input = _getch();
         if (input == 'w' || input == 'W') {
-            if (control_x > 0) control_x--; // Move up
+            if (control_x > 0){
+                control_x--; // Move up
+                playSound("sfx/move.wav");
+            }
         } else if (input == 's' || input == 'S') {
-            if (control_x < menu_size - 1) control_x++; // Move down
+            if (control_x < menu_size - 1){
+                control_x++; // Move down
+                playSound("sfx/move.wav");
+            }
         }
 
     } while (input != '\r'); // ini adalah ascii untuk 'ENTER', dia berhenti kalo enter di tekan
 
+    playSound("sfx/select.wav");
     return control_x;
 }
 
-//bool playBackgroundMusic() {
-//    try {
-//        sf::Music* music = new sf::Music();
-//        if (!music->openFromFile("music/MainTheme.wav")) {
-//            cout << "Error: Could not load music file" << endl;
-//            return false;
-//        }
-//        music->setVolume(50);
-//        music->setLoop(true);
-//        music->play();
-//        return true;
-//    } catch (const exception& e) {
-//        cout << "Error playing music: " << e.what() << endl;
-//        return false;
-//    }
-//}
+void loadScores() {
+    ifstream infile("leaderboard.txt");
+    string name;
+    int score;
+
+    if (!infile) {
+        cout << "Failed to open leaderboard file." << endl;
+        return;
+    }
+
+    while (infile >> name >> score) {
+        playerNames.push_back(name);
+        scores.push_back(score);
+    }
+    infile.close();
+}
+
+
+void saveScores() {
+    ofstream outfile("leaderboard.txt");
+
+    for (int i = 0; i < playerNames.size(); ++i) {
+        outfile << playerNames[i] << " " << scores[i] << endl;
+    }
+    outfile.close();
+}
+
+void saveScore(int score, const string& playerName) {
+    bool playerExists = false;
+    for (int i = 0; i < playerNames.size(); ++i) {
+        if (playerNames[i] == playerName) {
+            scores[i] += score;
+            playerExists = true;
+            break;
+        }
+    }
+
+    if (!playerExists) {
+        playerNames.push_back(playerName);
+        scores.push_back(score);
+    }
+
+    for (size_t i = 0; i < scores.size(); ++i) {
+        for (size_t j = i + 1; j < scores.size(); ++j) {
+            if (scores[i] < scores[j]) {
+                swap(scores[i], scores[j]);
+                swap(playerNames[i], playerNames[j]);
+            }
+        }
+    }
+
+    saveScores();
+}
+
+void showLeaderboard() {
+    ifstream inFile("leaderboard.txt");
+    string name;
+    int score;
+    int count = 1;
+    string topName;
+    int topScore = 0;
+
+    if (!inFile) {
+        cout << "Failed to open leaderboard file." << endl;
+        Sleep(2000);
+        return;
+    }
+
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    int console_width, console_height;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    console_width = csbi.dwSize.X;
+    console_height = csbi.dwSize.Y;
+
+    const int menu_width = 60;
+
+    system("cls");
+
+    string horizontal_padding((console_width - menu_width) / 2, ' ');
+
+    cout << horizontal_padding << "=========================================================" << endl;
+    cout << horizontal_padding << "| o                                                   o |" << endl;
+    cout << horizontal_padding << "|      @      @@@     @@@     @@@      @@@     @@@      |" << endl;
+    cout << horizontal_padding << "|      @      @@      @@@     @  @     @@      @@@      |" << endl;
+    cout << horizontal_padding << "|      @@@    @@@     @ @     @@@      @@@     @  @     |" << endl;
+    cout << horizontal_padding << "| o                                                   o |" << endl;
+    cout << horizontal_padding << "|          @@@@    @@@     @@@     @@@      @@@         |" << endl;
+    cout << horizontal_padding << "|          @ @     @ @     @@@     @@@      @  @        |" << endl;
+    cout << horizontal_padding << "|          @@@@    @@@     @ @     @  @     @@@         |" << endl;
+    cout << horizontal_padding << "| o                                                   o |" << endl;
+    cout << horizontal_padding << "=========================================================" << endl;
+
+    cout << endl;
+
+    cout << horizontal_padding <<"+=======================================================+" << endl;
+    cout << horizontal_padding <<"|                 TOP 5 HIGHEST SCORERS                 |" << endl;
+    cout << horizontal_padding <<"+=======================================================+" << endl;
+    cout << horizontal_padding <<"| " << left << setw(4) << "No"
+         << "| " << left << setw(15) << "Name"
+         << "| " << right << setw(10) << "Score" << "   |                 |" << endl;
+    cout << horizontal_padding <<"+=======================================================+" << endl;
+
+    while (inFile >> name >> score && count <= 5) {
+        cout << horizontal_padding <<"| " << left << setw(4) << count
+             << "| " << left << setw(15) << name
+             << "| " << right << setw(10) << score << "   |                 |" << endl;
+
+        if (score > topScore) {
+            topScore = score;
+            topName = name;
+        }
+
+        count++;
+    }
+
+    while (count <= 5) {
+        cout << horizontal_padding <<"| " << left << setw(4) << count
+             << "| " << left << setw(15) << "-"
+             << "| " << right << setw(10) << "0" << "   |                 |" << endl;
+        count++;
+    }
+
+    cout << horizontal_padding <<"+=======================================================+" << endl;
+
+    if (!topName.empty()) {
+        cout << horizontal_padding <<"| " << left << setw(9) << "              Congratulation to " << topName << "             |" << endl;
+        cout << horizontal_padding <<"| " << left << setw(9) << "              Your highest score is " << topScore << "               |"<< endl;
+    }
+
+    cout << horizontal_padding << "+=======================================================+" << endl;
+    cout << horizontal_padding <<"|          Press any key to return to menu...           |" << endl;
+    cout << horizontal_padding <<"+=======================================================+" << endl;
+
+    inFile.close();
+    getch();
+}
+
+bool playBackgroundMusic(const string &filename) {
+    if (!PlaySound(filename.c_str(), NULL, SND_FILENAME | SND_LOOP | SND_ASYNC)) {
+        cerr << "Error playing music: " << filename << endl;
+        return false;
+    }
+    return true;
+}
 
 int main() {
     srand(time(0));
@@ -359,9 +507,20 @@ int main() {
     int arena[height][width] = {0};
     bool flag = true;
     int tempY;
+    score=0;
+
+    system("cls");
+
+    cout << "Enter Your Name : ";
+    cin >> playerName;
+
+    cout << "Have Fun Playing!" << endl;
+    Sleep(1500);
+
+    system("cls");
 
     while (!gameOver(arena)) {
-//        playBackgroundMusic();
+        playBackgroundMusic("music/MainTheme.wav");
         bool drop = false;
         if (canMove(arena, tetromino_x, tetromino_y, currentTetromino) && flag) {
             dx = 0;
@@ -428,10 +587,17 @@ int main() {
     }
 
     cout << "Game Over!" << endl;
+    loadScores();
+    saveScore(score, playerName);
+    Sleep(2000);
+
         } else if (selection==1){
-            cout << "Hello World!" << endl;
+            showLeaderboard();
+        } else if (selection==2){ // kosong dulu buat sementara
             break;
-        } else if (selection==2){
+        } else if (selection==3){
+            cout << "Exiting Program..." << endl;
+            Sleep(1000);
             break;
         }
     }
