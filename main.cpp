@@ -42,14 +42,6 @@ void playSound(const string &filename) {
     }
 }
 
-bool playBackgroundMusic(const string &filename) {
-    if (!PlaySound(filename.c_str(), NULL, SND_FILENAME | SND_LOOP | SND_ASYNC)) {
-        cerr << "Error playing music: " << filename << endl;
-        return false;
-    }
-    return true;
-}
-
 int arenaColors[height][width] = {0};
 
 // set warnanya ganti aja angkanya kalo mau ganti warna (1-15)
@@ -580,6 +572,8 @@ void showLeaderboard() {
 
     system("cls");
 
+    playSound("music/leaderboard.wav");
+
     string horizontal_padding((console_width - menu_width) / 2, ' ');
 
     cout << horizontal_padding << "=========================================================" << endl;
@@ -671,7 +665,7 @@ void runNormalGame() {
 
     system("cls");
 
-    playBackgroundMusic("music/MainTheme.wav");
+    playSound("music/MainTheme.wav");
 
     while (!gameOver(arena)) {
         bool drop = false;
