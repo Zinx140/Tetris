@@ -42,6 +42,14 @@ void playSound(const string &filename) {
     }
 }
 
+bool playBackgroundMusic(const string &filename) {
+    if (!PlaySound(filename.c_str(), NULL, SND_FILENAME | SND_LOOP | SND_ASYNC)) {
+        cerr << "Error playing music: " << filename << endl;
+        return false;
+    }
+    return true;
+}
+
 int arenaColors[height][width] = {0};
 
 // set warnanya ganti aja angkanya kalo mau ganti warna (1-15)
@@ -350,6 +358,22 @@ int difficulty_menu(const int console_width, const int menu_width, int start_lin
     char input;
     const int menu_size = 3;
 
+    string horizontal_padding((console_width - menu_width) / 2, ' ');
+    system("cls");
+    cout << horizontal_padding << "############################################################" << endl;
+    cout << horizontal_padding << "#                                                          #" << endl;
+    cout << horizontal_padding << "#        @@@@@@  @@@@@  @@@@@@  @@@@  @@  @@@@@@@          #" << endl;
+    cout << horizontal_padding << "#        @@@@@@  @      @@@@@@  @  @  @@  @@               #" << endl;
+    cout << horizontal_padding << "#          @@    @@@@@    @@    @@@@  @@  @@@@@@@          #" << endl;
+    cout << horizontal_padding << "#          @@    @@@@@    @@    @@    @@  @@@@@@@          #" << endl;
+    cout << horizontal_padding << "#          @@    @        @@    @ @   @@       @@          #" << endl;
+    cout << horizontal_padding << "#          @@    @@@@@    @@    @  @  @@  @@@@@@@          #" << endl;
+    cout << horizontal_padding << "#                                                          #" << endl;
+    cout << horizontal_padding << "#                                                          #" << endl;
+    cout << horizontal_padding << "#                                                          #" << endl;
+
+    start_line = 11;
+
     do {
         clearBottomPart(start_line, console_width, menu_size + 3);
         draw_menu_selection(console_width, menu_width, arr_difficulty, menu_size, control_x, start_line);
@@ -379,6 +403,22 @@ int play_submenu(const int console_width, const int menu_width, int& difficulty,
     char input;
     const int menu_size = 3;  // JANGAN DI GANTI NANTI ERROR
 
+    string horizontal_padding((console_width - menu_width) / 2, ' ');
+    system("cls");
+    cout << horizontal_padding << "############################################################" << endl;
+    cout << horizontal_padding << "#                                                          #" << endl;
+    cout << horizontal_padding << "#        @@@@@@  @@@@@  @@@@@@  @@@@  @@  @@@@@@@          #" << endl;
+    cout << horizontal_padding << "#        @@@@@@  @      @@@@@@  @  @  @@  @@               #" << endl;
+    cout << horizontal_padding << "#          @@    @@@@@    @@    @@@@  @@  @@@@@@@          #" << endl;
+    cout << horizontal_padding << "#          @@    @@@@@    @@    @@    @@  @@@@@@@          #" << endl;
+    cout << horizontal_padding << "#          @@    @        @@    @ @   @@       @@          #" << endl;
+    cout << horizontal_padding << "#          @@    @@@@@    @@    @  @  @@  @@@@@@@          #" << endl;
+    cout << horizontal_padding << "#                                                          #" << endl;
+    cout << horizontal_padding << "#                                                          #" << endl;
+    cout << horizontal_padding << "#                                                          #" << endl;
+
+    start_line = 11;
+
     do {
         clearBottomPart(start_line, console_width, menu_size + 3);
         draw_menu_selection(console_width, menu_width, arr_submenu, menu_size, control_x, start_line);
@@ -404,13 +444,11 @@ int play_submenu(const int console_width, const int menu_width, int& difficulty,
     }
 
     if (control_x == 1) {
-        difficulty = difficulty_menu(console_width, menu_width, start_line); // lanjut ke menu difficulty
         return 1;
     }
 
     return -1; // kembali ke main menu
 }
-
 
 int main_menu(const int console_width, const int menu_width) {
     string arr_mainmenu[3] = {"Play", "Leaderboard", "Exit"};
@@ -451,12 +489,6 @@ int main_menu(const int console_width, const int menu_width) {
         } else if (input == '\r') { // ENTER key
             playSound("sfx/select.wav");
             if (control_x == 0) {
-//                if (play_submenu(console_width, menu_width, difficulty, start_line)) {
-//                    system("cls");
-//                    return 0; //jgn di hapus rusak kalo ga ada breaknya
-//                }
-//            return 0;
-            int selection_submenu = play_submenu(console_width, menu_width, control_x, start_line);
                 return 0;
             } else if (control_x == 1) {
                 return 1;
@@ -638,6 +670,8 @@ void runNormalGame() {
     Sleep(1500);
 
     system("cls");
+
+    playBackgroundMusic("music/MainTheme.wav");
 
     while (!gameOver(arena)) {
         bool drop = false;
@@ -846,14 +880,6 @@ void runGame(int bossHealth, int interval) {
     Sleep(2000);
 }
 
-bool playBackgroundMusic(const string &filename) {
-    if (!PlaySound(filename.c_str(), NULL, SND_FILENAME | SND_LOOP | SND_ASYNC)) {
-        cerr << "Error playing music: " << filename << endl;
-        return false;
-    }
-    return true;
-}
-
 int main() {
     srand(time(0));
     loadScores();
@@ -882,6 +908,14 @@ int main() {
             runNormalGame();
         } else if (selection_submenu == 1){
             int selection_difficulty = difficulty_menu(console_width, menu_width, start_line);
+
+            if (selection_difficulty == 0){
+                runGame(easy, intervalEasy);
+            } else if (selection_difficulty == 1){
+                runGame (medium, intervalMed);
+            } else if (selection_difficulty == 2){
+                runGame (hard, intervalHard);
+            }
         } else if (selection_submenu == -1){
             continue;
         }
@@ -890,12 +924,6 @@ int main() {
     } else if (selection_menu == 2){
         break;
     }
-
-//
-//            runGame(easy, intervalEasy);
-//            playBackgroundMusic("music/MainTheme.wav");
-
-
     }
     return 0;
 }
