@@ -244,6 +244,7 @@ void clearLines(int arena[height][width], int &bossHealth) {
             if(doubleDamage == true) {
                 score += 200;
                 bossHealth -= 200;
+                doubleDamage = false;
             } else {
                 score += 100;
                 bossHealth -= 100;
@@ -646,13 +647,11 @@ void updateCooldowns() {
 }
 
 void activatePlayerSkills(char control, int arena[height][width], int &bossHealth) {
-    if (control == '1' && destroy >= 0) {
-//        doubleDamage = true
-    fillBottomRow(arena);
-
+    if (control == '1' && destroy >= 1) {
+        doubleDamage = true;
         skillCooldown_1 = 10; //sek blm
     } else if (control == '2' && destroy >= 2) {
-//        activateClearBottomRow(arena, bossHealth);
+        fillBottomRow(arena);
         skillCooldown_2 = 20;  //sek blm
     } else if (control == '3' && destroy >= 3) {
         activateShield();
