@@ -19,7 +19,7 @@ int score = 0;
 string playerName;
 vector<string> playerNames;
 vector<int> scores;
-int destroy = 0;
+int destroyLines = 0;
 
 bool skill_1_active = false;
 bool skill_2_active = false;
@@ -122,7 +122,7 @@ void draw(int arena[height][width], int arenaColors[height][width], vector<vecto
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             if (arena[i][j] == 1 || arena[i][j] == 7) {
-                setColor(arenaColors[i][j]); // ngeset warna tetromino
+//                setColor(arenaColors[i][j]); // ngeset warna tetromino
                 cout << "@";
                 setColor(7); // Reset color ke default
             } else if (arena[i][j] == 2) {
@@ -236,8 +236,6 @@ void clearLines(int arena[height][width], int &bossHealth) {
                 fullLine = false;
                 break;
             }
-        }
-        if (fullLine) {
             if(doubleDamage == true) {
                 score += 200;
                 bossHealth -= 200;
@@ -246,7 +244,7 @@ void clearLines(int arena[height][width], int &bossHealth) {
                 score += 100;
                 bossHealth -= 100;
             }
-            destroy++;
+            destroyLines++;
 
             for (int j = 1; j < width - 1; j++) {
                 arena[i][j] = 0;
@@ -622,9 +620,7 @@ void fillBottomRow(int arena[height][width]) {
     int i = height - 2;
 
     for (int j = 1; j < width - 1; j++) {
-        if (arena[i][j] == 0) {
-            arena[i][j] = 7;
-        }
+        arena[i][j] = 7;
     }
 }
 
@@ -634,13 +630,13 @@ void activateClearBottomRow(int arena[height][width], int &bossHealth) {
 }
 
 void activatePlayerSkills(char control, int arena[height][width], int &bossHealth) {
-    if (control == '1' && destroy >= 1) {
+    if (control == '1' && destroyLines >= 1) {
         doubleDamage = true;
 
-    } else if (control == '2' && destroy >= 2) {
+    } else if (control == '2') {
         fillBottomRow(arena);
 
-    } else if (control == '3' && (destroy >= 3 && destroy % 3 == 0)) {
+    } else if (control == '3' && (destroyLines >= 3 && destroyLines % 3 == 0)) {
         shieldActive = true;
         if(cdUltimate <= 0) {
             cdUltimate = 120;
@@ -730,6 +726,8 @@ void runGame(int bossHealth, int interval) {
                         flag = false;
                     } else if(control == '1' || control == '2' || control == '3') {
                         activatePlayerSkills(control, arena, bossHealth);
+                        hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
+                        clearLines(arena, bossHealth);
                     }
 
                 } else {
@@ -804,7 +802,7 @@ void runGame(int bossHealth, int interval) {
 
 
         counter++; // buat nambah detik
-        cout << "destroy : " << destroy << endl;
+        cout << "destroy : " << destroyLines << endl;
         cout << "Boss Health: " << bossHealth << endl;
         hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
         draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex);
@@ -820,19 +818,19 @@ void runGame(int bossHealth, int interval) {
         }
 
         // Update status skill menggunakan if-if
-        if (destroy >= 1) {
+        if (destroyLines >= 1) {
             skill_1_active = true;
         } else {
             skill_1_active = false;
         }
 
-        if (destroy >= 2) {
+        if (destroyLines >= 2) {
             skill_2_active = true;
         } else {
             skill_2_active = false;
         }
 
-         if (destroy >= 3 && destroy % 3 == 0) {
+         if (destroyLines >= 3 && destroyLines % 3 == 0) {
             if (cdUltimate > 0) {
                 skill_3_active = true; // Still active while cooldown runs
             } else {
@@ -841,10 +839,6 @@ void runGame(int bossHealth, int interval) {
         } else {
             skill_3_active = false; // Inactive if destroy < 3
         }
-
-
-
-
 
         displaySkillStatus(skill_1_active, skill_2_active, skill_3_active);
         Sleep(100);
