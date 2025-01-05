@@ -21,16 +21,13 @@ vector<string> playerNames;
 vector<int> scores;
 int destroy = 0;
 
-
-
 bool skill_1_active = false;
 bool skill_2_active = false;
 bool skill_3_active = false;
 bool doubleDamage = false;
 bool shieldActive = false;
-int skillCooldown_1 = 0;  // Cooldown untuk skill 1 (misalnya 10 detik)
-int skillCooldown_2 = 0;  // Cooldown untuk skill 2 (misalnya 20 detik)
-int skillCooldown_3 = 0;  // Cooldown untuk skill 3 (misalnya 30 detik)
+
+int cdUltimate = 120;
 
 // Tetromino menggunakan vector
 vector<vector<vector<int>>> tetromino = {
@@ -248,8 +245,8 @@ void clearLines(int arena[height][width], int &bossHealth) {
             } else {
                 score += 100;
                 bossHealth -= 100;
-                destroy++;
             }
+            destroy++;
 
             for (int j = 1; j < width - 1; j++) {
                 arena[i][j] = 0;
@@ -636,26 +633,18 @@ void activateClearBottomRow(int arena[height][width], int &bossHealth) {
     bossHealth -= 100;
 }
 
-void activateShield() {
-    shieldActive = true;
-}
-
-void updateCooldowns() {
-    if (skillCooldown_1 > 0) skillCooldown_1--;
-    if (skillCooldown_2 > 0) skillCooldown_2--;
-    if (skillCooldown_3 > 0) skillCooldown_3--;
-}
-
 void activatePlayerSkills(char control, int arena[height][width], int &bossHealth) {
     if (control == '1' && destroy >= 1) {
         doubleDamage = true;
-        skillCooldown_1 = 10; //sek blm
+
     } else if (control == '2' && destroy >= 2) {
         fillBottomRow(arena);
-        skillCooldown_2 = 20;  //sek blm
-    } else if (control == '3' && destroy >= 3) {
-        activateShield();
-        skillCooldown_3 = 30;  //sek blm
+
+    } else if (control == '3' && (destroy >= 3 && destroy % 3 == 0)) {
+        shieldActive = true;
+        if(cdUltimate <= 0) {
+            cdUltimate = 120;
+        }
     }
 }
 
@@ -677,7 +666,8 @@ void displaySkillStatus(bool skill_1_active, bool skill_2_active, bool skill_3_a
 
     // Cek skill 3
     if (skill_3_active) {
-        cout << "Skill 3 (Shield/Defense): Active" << endl;
+//        cout << "Skill 3 (Shield/Defense): Active" << endl;
+        cout << "Skill 3 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
     } else {
         cout << "Skill 3 (Shield/Defense): Inactive" << endl;
     }
@@ -811,22 +801,51 @@ void runGame(int bossHealth, int interval) {
             flag = true;
         }
 
+
+
         counter++; // buat nambah detik
         cout << "destroy : " << destroy << endl;
         cout << "Boss Health: " << bossHealth << endl;
         hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
         draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex);
         clearLines(arena, bossHealth);
-        if (destroy >= 1 && skillCooldown_1 <= 0) {
-            skill_1_active = true;
-            skillCooldown_1 = 10;   //sek blm
-        } else if (destroy >= 2 && skillCooldown_2 <= 0) {
-            skill_2_active = true;
-            skillCooldown_2 = 20;  //sek blm
-        } else if (destroy >= 3 && skillCooldown_3 <= 0) {
-            skill_3_active = true;
-            skillCooldown_3 = 30;   //sek blm
+
+        if(shieldActive) {
+            if(cdUltimate > 0) {
+                cdUltimate--;
+            }
+            else {
+                shieldActive = false;
+            }
         }
+
+        // Update status skill menggunakan if-if
+        if (destroy >= 1) {
+            skill_1_active = true;
+        } else {
+            skill_1_active = false;
+        }
+
+        if (destroy >= 2) {
+            skill_2_active = true;
+        } else {
+            skill_2_active = false;
+        }
+
+         if (destroy >= 3 && destroy % 3 == 0) {
+            if (cdUltimate > 0) {
+                skill_3_active = true; // Still active while cooldown runs
+            } else {
+                skill_3_active = false; // Inactive once cooldown finishes
+            }
+        } else {
+            skill_3_active = false; // Inactive if destroy < 3
+        }
+
+
+
+
+
         displaySkillStatus(skill_1_active, skill_2_active, skill_3_active);
         Sleep(100);
         system("cls");
