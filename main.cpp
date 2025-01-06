@@ -115,12 +115,14 @@ void draw(int arena[height][width], int arenaColors[height][width], vector<vecto
     const int boxHeight = 4;
     const int boxWidth = 4;
     const int horizontalSpacing = 5;
+    SetConsoleOutputCP(CP_UTF8); // tolong pake ini biar gak rusak displaynya
+    SetConsoleCP(CP_UTF8);
 
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             if (arena[i][j] == 1 || arena[i][j] == 7) {
                 setColor(arenaColors[i][j]); // ngeset warna tetromino
-                cout << "@";
+                cout << "\u2589";
                 setColor(7); // Reset color ke default
             } else if (arena[i][j] == 2) {
                 cout << "#";
@@ -135,9 +137,6 @@ void draw(int arena[height][width], int arenaColors[height][width], vector<vecto
 
         // Draw the "Next Tetromino" box
         cout << string(horizontalSpacing, ' ');
-        if(i == 1) {
-            cout << "Score : " << score;
-        }
         if (i == (height / 2 - boxHeight / 2 - 2)) {
             cout << "Next Tetromino:";
         }
@@ -153,7 +152,7 @@ void draw(int arena[height][width], int arenaColors[height][width], vector<vecto
                 for (int j = 0; j < nextTetromino[tetrominoRow].size(); j++) {
                     if (nextTetromino[tetrominoRow][j] == 1) {
                         setColor(tetrominoColors[nextTetrominoIndex]); // Color for next tetromino
-                        cout << "@";
+                        cout << "\u2589";
                         setColor(7); // Reset
                     } else {
                         cout << " ";
@@ -172,11 +171,12 @@ void draw(int arena[height][width], int arenaColors[height][width], vector<vecto
 
     // Instructions
     cout << endl;
-    cout << "'A' to move tetromino to the left" << endl;
-    cout << "'D' to move tetromino to the right" << endl;
-    cout << "'W' to rotate tetromino" << endl;
+    cout << "'A' to Move tetromino to the left" << endl;
+    cout << "'D' to Move tetromino to the right" << endl;
+    cout << "'W' to Rotate tetromino" << endl;
     cout << "'S' to Drop the tetromino" << endl;
 }
+
 
 
 bool canMove(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino) {
