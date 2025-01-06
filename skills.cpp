@@ -122,7 +122,7 @@ void draw(int arena[height][width], int arenaColors[height][width], vector<vecto
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             if (arena[i][j] == 1 || arena[i][j] == 7) {
-//                setColor(arenaColors[i][j]); // ngeset warna tetromino
+                setColor(arenaColors[i][j]); // ngeset warna tetromino
                 cout << "@";
                 setColor(7); // Reset color ke default
             } else if (arena[i][j] == 2) {
@@ -228,7 +228,7 @@ bool canTurnRight(int arena[height][width], int position_x, int position_y, vect
     return true;
 }
 
-void clearLines(int arena[height][width], int &bossHealth) {
+void clearLines(int arena[height][width], int &bossHealth, int arenaColors[height][width]) {
     for (int i = 1; i < height - 1; i++) {
         bool fullLine = true;
         for (int j = 1; j < width - 1; j++) {
@@ -252,6 +252,7 @@ void clearLines(int arena[height][width], int &bossHealth) {
             for (int k = i; k > 1; k--) {
                 for (int j = 1; j < width - 1; j++) {
                     arena[k][j] = arena[k - 1][j];
+                    arenaColors[k][j] = arenaColors[k - 1][j];
                 }
             }
         }
@@ -616,11 +617,13 @@ void runNormalGame() {
     Sleep(2000);
 }
 
-void fillBottomRow(int arena[height][width]) {
+void fillBottomRow(int arena[height][width], int tetromino_y, int tetromino_x, int randomTetromino) {
     int i = height - 2;
 
     for (int j = 1; j < width - 1; j++) {
         arena[i][j] = 7;
+        arenaColors[tetromino_y + i - 1][tetromino_x + j] = tetrominoColors[randomTetromino];
+
     }
 }
 
@@ -629,12 +632,12 @@ void activateClearBottomRow(int arena[height][width], int &bossHealth) {
     bossHealth -= 100;
 }
 
-void activatePlayerSkills(char control, int arena[height][width], int &bossHealth) {
+void activatePlayerSkills(char control, int arena[height][width], int &bossHealth, int tetrominoY,int  tetrominoX, int randomTetromino) {
     if (control == '1' && destroyLines >= 1) {
         doubleDamage = true;
 
-    } else if (control == '2') {
-        fillBottomRow(arena);
+    } else if (control == '2' && destroyLines >= 2) {
+        fillBottomRow(arena, tetrominoY, tetrominoX, randomTetromino);
 
     } else if (control == '3' && (destroyLines >= 3 && destroyLines % 3 == 0)) {
         shieldActive = true;
@@ -697,7 +700,7 @@ void runGame(int bossHealth, int interval) {
 
     system("cls");
 
-    while (!gameOver(arena)) {
+    while (!gameOver(arena) && bossHealth > 0) {
         bool drop = false;
         if (canMove(arena, tetromino_x, tetromino_y, currentTetromino) && flag) {
             dx = 0;
@@ -725,9 +728,10 @@ void runGame(int bossHealth, int interval) {
                         drop = true;
                         flag = false;
                     } else if(control == '1' || control == '2' || control == '3') {
-                        activatePlayerSkills(control, arena, bossHealth);
+                        activatePlayerSkills(control, arena, bossHealth, tetromino_y, tetromino_x, randomTetromino);
                         hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
-                        clearLines(arena, bossHealth);
+                        draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex);
+                        clearLines(arena, bossHealth, arenaColors);
                     }
 
                 } else {
@@ -806,7 +810,7 @@ void runGame(int bossHealth, int interval) {
         cout << "Boss Health: " << bossHealth << endl;
         hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
         draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex);
-        clearLines(arena, bossHealth);
+        clearLines(arena, bossHealth, arenaColors);
 
         if(shieldActive) {
             if(cdUltimate > 0) {
@@ -845,7 +849,11 @@ void runGame(int bossHealth, int interval) {
         system("cls");
     }
 
-    cout << "Game Over!" << endl;
+    if (bossHealth > 0) {
+        cout << "Better luck next time" << endl;
+    } else {
+        cout << "Congratulations You WIn" << endl;
+    }
     Sleep(2000);
 }
 
@@ -859,7 +867,7 @@ int main() {
             int easy = 3000, intervalEasy = 60; // easy, medium,
             int medium = 4500, intervalMed = 45;
             int hard = 6000, intervalHard = 5;
-//            runNormalGame();
+        //    runNormalGame();
             runGame(easy, intervalEasy);
         } else if (selection==1){
             showLeaderboard();
