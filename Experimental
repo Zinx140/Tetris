@@ -93,26 +93,6 @@ void setFullScreenMode() {
     }
 }
 
-void boss_default() {
-    cout << " ,-----------------------." << endl;
-    cout << "  /                         \\" << endl;
-    cout << " /     ____           ____   \\" << endl;
-    cout << "|    //----\\\\       //----\\\\  |" << endl;
-    cout << "|    ||    ||       ||    ||  |" << endl;
-    cout << "|    ||  * ||       ||  * ||  |" << endl;
-    cout << "|    ||____||_______||____||  |" << endl;
-    cout << "|     \\\\____//       \\\\____//  |" << endl;
-    cout << " \\___       _______       ___/" << endl;
-    cout << "     /__               __\\" << endl;
-    cout << "    |   |_____________|   |" << endl;
-    cout << "    |   ||           ||   |" << endl;
-    cout << "    |   ||           ||   |" << endl;
-    cout << "    |___||___________||___|" << endl;
-    cout << "     \\\\_|||         |||_//" << endl;
-    cout << "       \\\\||         ||//" << endl;
-    cout << "        -|_________|-'" << endl;
-    cout << "          ---------' " << endl;
-}
 
 int arenaColors[height][width] = {0};
 
