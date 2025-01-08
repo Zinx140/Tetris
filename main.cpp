@@ -19,14 +19,16 @@ int score = 0;
 string playerName;
 vector<string> playerNames;
 vector<int> scores;
-int mana = 2;
+int mana = 6;
 
 bool skill_1_active = false;
 bool skill_2_active = false;
+bool skill_3_active = false;
 bool doubleDamage = false;
 bool shieldActive = false;
 
 int cdUltimate = 0;
+int cdSkill2 = 0;
 int cdSkill1 = 0;
 
 // Tetromino menggunakan vector
@@ -228,6 +230,15 @@ bool canTurnRight(int arena[height][width], int position_x, int position_y, vect
     return true;
 }
 
+void fillBottomRow(int arena[height][width], int tetromino_y, int tetromino_x, int randomTetromino) {
+    int i = height - 2;
+
+    for (int j = 1; j < width - 1; j++) {
+        arena[i][j] = 7;
+        arenaColors[tetromino_y + i - 1][tetromino_x + j] = tetrominoColors[randomTetromino];
+    }
+}
+
  void clearLines(int arena[height][width], int &bossHealth, int arenaColors[height][width]) {
      for (int i = 1; i < height - 1; i++) {
          bool fullLine = true;
@@ -283,7 +294,6 @@ void clearLines(int arena[height][width], int arenaColors[height][width]) {
         }
     }
 }
-
 
 bool gameOver(int arena[height][width]) {
     for (int j = 1; j < width - 1; j++) {
@@ -619,23 +629,28 @@ void runNormalGame() {
     Sleep(2000);
 }
 
-void activatePlayerSkills(char control, int arena[height][width], int &bossHealth) {
+void activatePlayerSkills(char control, int arena[height][width], int &bossHealth, int tetrominoX, int tetrominoY, int randomTetromino) {
     if (control == '1' && mana >= 1) {
         if(cdSkill1 <= 0) {
             doubleDamage = true;
             cdSkill1 = 60;
             mana--;
         }
-    } else if (control == '2' && mana >= 2) {
+    } else if (control == '2' && mana >= 3 && cdSkill2 == 0) {
+        fillBottomRow(arena, tetrominoY, tetrominoX, randomTetromino);
+        clearLines(arena, bossHealth, arenaColors);
+        cdSkill2 = 30;
+        mana -= 3;
+    } else if (control == '3' && mana >= 5) {
         if(cdUltimate <= 0) {
             shieldActive = true;
             cdUltimate = 120;
-            mana -= 2;
+            mana -= 5;
         }
     }
 }
 
-void displaySkillStatus(bool skill_1_active, bool skill_2_active) {
+void displaySkillStatus(bool skill_1_active, bool skill_2_active, bool skill_3_active) {
 
     // Cek skill 1
     if (skill_1_active && cdSkill1 == 0) {
@@ -646,15 +661,21 @@ void displaySkillStatus(bool skill_1_active, bool skill_2_active) {
         cout << "Skill 1 (Double Damage): Inactive" << endl;
     }
 
-    // Cek skill 2
-    if (skill_2_active && cdUltimate == 0) {
-        cout << "Skill 2 (Shield/Defense): Active" << endl;
-    } else if (cdUltimate > 0) {
-        cout << "Skill 2 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
+    //Cek Skill 2
+    if (skill_2_active) {
+        cout << "Skill 2 (Destroy Lower Lines): Active" << endl;
     } else {
-        cout << "Skill 2 (Shield/Defense): Inactive" << endl;
+        cout << "Skill 2 (Destroy Lower Lines): Inactive - Coldown : " << cdSkill2 << endl;
     }
 
+    // Cek skill 3
+    if (skill_3_active && cdUltimate == 0) {
+        cout << "Skill 3 (Shield/Defense): Active" << endl;
+    } else if (cdUltimate > 0) {
+        cout << "Skill 3 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
+    } else {
+        cout << "Skill 3 (Shield/Defense): Inactive" << endl;
+    }
 }
 
 void runGame(int bossHealth, int interval) {
@@ -711,7 +732,7 @@ void runGame(int bossHealth, int interval) {
                         drop = true;
                         flag = false;
                     } else if(control == '1' || control == '2' || control == '3') {
-                        activatePlayerSkills(control, arena, bossHealth);
+                        activatePlayerSkills(control, arena, bossHealth, tetromino_x, tetromino_y, randomTetromino);
                     }
 
                 } else {
@@ -733,7 +754,7 @@ void runGame(int bossHealth, int interval) {
                 muteMove = true;
                 do {
                     randomSkill = rand() % 4 + 1;
-                } while((randomSkill == 3 && bossHealth + 50 > limitHealth) || (randomSkill == 1 && !canRandom(changeTetromino, arena, tetromino_x, tetromino_y)));
+                } while((randomSkill == 3 && bossHealth + 50 >= limitHealth) || (randomSkill == 1 && !canRandom(changeTetromino, arena, tetromino_x, tetromino_y)));
 
                 if (shieldActive) {
                     cout << "Boss skill blocked by Shield!" << endl;
@@ -808,6 +829,9 @@ void runGame(int bossHealth, int interval) {
             if(cdSkill1 > 0) {
                 cdSkill1--;
             }
+            if (cdSkill2 > 0) {
+                cdSkill2--;
+            }
         }
 
         //kriteria skill
@@ -817,17 +841,23 @@ void runGame(int bossHealth, int interval) {
             skill_1_active = false;
         }
 
-        if (mana >= 2) {
-            if (cdUltimate > 0) {
-                skill_2_active = true; // Still active while cooldown runs
-            } else {
-                skill_2_active = false; // Inactive once cooldown finishes
-            }
+        if (mana >= 3 && cdSkill2 == 0) {
+            skill_2_active = true;
         } else {
-            skill_2_active = false; // Inactive if mana < 2
+            skill_2_active = false;
         }
 
-        displaySkillStatus(skill_1_active, skill_2_active);
+        if (mana >= 5) {
+            if (cdUltimate > 0) {
+                skill_3_active = true; // Still active while cooldown runs
+            } else {
+                skill_3_active = false; // Inactive once cooldown finishes
+            }
+        } else {
+            skill_3_active = false; // Inactive if mana < 5
+        }
+
+        displaySkillStatus(skill_1_active, skill_2_active, skill_3_active);
         Sleep(100);
         system("cls");
     }
@@ -858,7 +888,6 @@ int main() {
             break;
         }
     }
-
 
     return 0;
 }
