@@ -23,12 +23,11 @@ int destroy = 0;
 
 bool skill_1_active = false;
 bool skill_2_active = false;
-bool skill_3_active = false;
 bool doubleDamage = false;
 bool shieldActive = false;
 
-int cdUltimate = 120;
-int cdSkill1 = 0, cdSkill2 = 0;
+int cdUltimate = 0;
+int cdSkill1 = 0;
 
 // Tetromino menggunakan vector
 vector<vector<vector<int>>> tetromino = {
@@ -619,36 +618,23 @@ void runNormalGame() {
     Sleep(2000);
 }
 
-void fillBottomRow(int arena[height][width]) {
-    int i = height - 2;
-
-    for (int j = 1; j < width - 1; j++) {
-        if (arena[i][j] == 0) {
-            arena[i][j] = 7;
-        }
-    }
-}
-
 void activatePlayerSkills(char control, int arena[height][width], int &bossHealth) {
     if (control == '1' && destroy >= 1) {
         if(cdSkill1 <= 0) {
             doubleDamage = true;
             cdSkill1 = 60;
+            destroy--;
         }
-    } else if (control == '2' && destroy >= 0) {
-        if(cdSkill2 <= 0) {
-            fillBottomRow(arena);
-            cdSkill2 = 60;
-        }
-    } else if (control == '3' && (destroy >= 3 && destroy % 3 == 0)) {
-        shieldActive = true;
+    } else if (control == '2' && destroy >= 2) {
         if(cdUltimate <= 0) {
+            shieldActive = true;
             cdUltimate = 120;
+            destroy -= 2;
         }
     }
 }
 
-void displaySkillStatus(bool skill_1_active, bool skill_2_active, bool skill_3_active) {
+void displaySkillStatus(bool skill_1_active, bool skill_2_active) {
 
     // Cek skill 1
     if (skill_1_active && cdSkill1 == 0) {
@@ -660,20 +646,10 @@ void displaySkillStatus(bool skill_1_active, bool skill_2_active, bool skill_3_a
     }
 
     // Cek skill 2
-    if (skill_2_active && cdSkill2 == 0) {
-        cout << "Skill 2 (Clear Bottom Row): Active" << endl;
-    } else if (cdSkill2 > 0) {
-        cout << "Skill 2 (Clear Bottom Row): Inactive - Coldown : " << cdSkill2 << endl;
+    if (skill_2_active && cdUltimate == 0) {
+        cout << "Skill 2 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
     } else {
-        cout << "Skill 2 (Clear Bottom Row): Inactive" << endl;
-    }
-
-    // Cek skill 3
-    if (skill_3_active) {
-//        cout << "Skill 3 (Shield/Defense): Active" << endl;
-        cout << "Skill 3 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
-    } else {
-        cout << "Skill 3 (Shield/Defense): Inactive" << endl;
+        cout << "Skill 2 (Shield/Defense): Inactive" << endl;
     }
 
 }
@@ -813,6 +789,7 @@ void runGame(int bossHealth, int interval) {
         draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex);
         clearLines(arena, bossHealth);
 
+        //cd berkurang
         if(shieldActive) {
             if(cdUltimate > 0) {
                 cdUltimate--;
@@ -825,34 +802,26 @@ void runGame(int bossHealth, int interval) {
         if(cdSkill1 > 0) {
             cdSkill1--;
         }
-        if(cdSkill2 > 0) {
-            cdSkill2--;
-        }
 
 
+        //kriteria skill
         if (destroy >= 1) {
             skill_1_active = true;
         } else {
             skill_1_active = false;
         }
 
-        if (destroy >= 0) {
-            skill_2_active = true;
-        } else {
-            skill_2_active = false;
-        }
-
-        if (destroy >= 3 && destroy % 3 == 0) {
+        if (destroy >= 2 && destroy % 2 == 0) {
             if (cdUltimate > 0) {
-                skill_3_active = true; // Still active while cooldown runs
+                skill_2_active = true; // Still active while cooldown runs
             } else {
-                skill_3_active = false; // Inactive once cooldown finishes
+                skill_2_active = false; // Inactive once cooldown finishes
             }
         } else {
-            skill_3_active = false; // Inactive if destroy < 3
+            skill_2_active = false; // Inactive if destroy < 3
         }
 
-        displaySkillStatus(skill_1_active, skill_2_active, skill_3_active);
+        displaySkillStatus(skill_1_active, skill_2_active);
         Sleep(100);
         system("cls");
     }
