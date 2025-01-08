@@ -19,7 +19,7 @@ int score = 0;
 string playerName;
 vector<string> playerNames;
 vector<int> scores;
-int mana = 0;
+int mana = 2;
 
 bool skill_1_active = false;
 bool skill_2_active = false;
@@ -228,39 +228,40 @@ bool canTurnRight(int arena[height][width], int position_x, int position_y, vect
     return true;
 }
 
-void clearLines(int arena[height][width], int &bossHealth) {
-    for (int i = 1; i < height - 1; i++) {
-        bool fullLine = true;
-        for (int j = 1; j < width - 1; j++) {
-            if (arena[i][j] != 7) {
-                fullLine = false;
-                break;
-            }
-        }
-        if (fullLine) {
-            if(doubleDamage == true) {
-                score += 200;
-                bossHealth -= 200;
-                doubleDamage = false;
-            } else {
-                score += 100;
-                bossHealth -= 100;
-            }
-            mana++;
+ void clearLines(int arena[height][width], int &bossHealth, int arenaColors[height][width]) {
+     for (int i = 1; i < height - 1; i++) {
+         bool fullLine = true;
+         for (int j = 1; j < width - 1; j++) {
+             if (arena[i][j] != 7) {
+                 fullLine = false;
+                 break;
+             }
+         }
+         if (fullLine) {
+              if(doubleDamage == true) {
+                  score += 200;
+                  bossHealth -= 200;
+                  doubleDamage = false;
+              } else {
+                  score += 100;
+                  bossHealth -= 100;
+              }
+              mana++;
+             for (int j = 1; j < width - 1; j++) {
+                 arena[i][j] = 0;
+             }
+             for (int k = i; k > 1; k--) {
+                 for (int j = 1; j < width - 1; j++) {
+                     arena[k][j] = arena[k - 1][j];
+                     arenaColors[k][j] = arenaColors[k - 1][j];
 
-            for (int j = 1; j < width - 1; j++) {
-                arena[i][j] = 0;
-            }
-            for (int k = i; k > 1; k--) {
-                for (int j = 1; j < width - 1; j++) {
-                    arena[k][j] = arena[k - 1][j];
-                }
-            }
-        }
-    }
-}
+                 }
+             }
+         }
+     }
+ }
 
-void clearLines(int arena[height][width]) {
+void clearLines(int arena[height][width], int arenaColors[height][width]) {
     for (int i = 1; i < height - 1; i++) {
         bool fullLine = true;
         for (int j = 1; j < width - 1; j++) {
@@ -277,6 +278,7 @@ void clearLines(int arena[height][width]) {
             for (int k = i; k > 1; k--) {
                 for (int j = 1; j < width - 1; j++) {
                     arena[k][j] = arena[k - 1][j];
+                    arenaColors[k][j] = arenaColors[k - 1][j];
                 }
             }
         }
@@ -608,7 +610,7 @@ void runNormalGame() {
         counter++;
         hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
         draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex);
-        clearLines(arena);
+        clearLines(arena, arenaColors);
         Sleep(100);
         system("cls");
     }
@@ -647,6 +649,8 @@ void displaySkillStatus(bool skill_1_active, bool skill_2_active) {
 
     // Cek skill 2
     if (skill_2_active && cdUltimate == 0) {
+        cout << "Skill 2 (Shield/Defense): Active" << endl;
+    } else if (cdUltimate > 0) {
         cout << "Skill 2 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
     } else {
         cout << "Skill 2 (Shield/Defense): Inactive" << endl;
@@ -680,7 +684,7 @@ void runGame(int bossHealth, int interval) {
 
     system("cls");
 
-    while (!gameOver(arena)) {
+    while (!gameOver(arena) && bossHealth > 0) {
         bool drop = false;
         if (canMove(arena, tetromino_x, tetromino_y, currentTetromino) && flag) {
             dx = 0;
@@ -780,29 +784,30 @@ void runGame(int bossHealth, int interval) {
             flag = true;
         }
 
-
-
         counter++; // buat nambah detik
-        cout << "destroy : " << mana << endl;
+        cout << "Your mana : " << mana << endl;
         cout << "Boss Health: " << bossHealth << endl;
         hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
         draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex);
-        clearLines(arena, bossHealth);
+        clearLines(arena, bossHealth, arenaColors);
 
         //cd berkurang
         if(shieldActive) {
-            if(cdUltimate > 0) {
-                cdUltimate--;
-            }
-            else {
-                shieldActive = false;
+            if (counter % 10 == 0) {
+                if(cdUltimate > 0) {
+                    cdUltimate--;
+                }
+                else {
+                    shieldActive = false;
+                }
             }
         }
 
-        if(cdSkill1 > 0) {
-            cdSkill1--;
+        if (counter % 10 == 0) {
+            if(cdSkill1 > 0) {
+                cdSkill1--;
+            }
         }
-
 
         //kriteria skill
         if (mana >= 1) {
@@ -812,7 +817,7 @@ void runGame(int bossHealth, int interval) {
         }
 
         if (mana >= 2) {
-            if (cdUltimate > 0) {
+            if (cdUltimate == 0) {
                 skill_2_active = true; // Still active while cooldown runs
             } else {
                 skill_2_active = false; // Inactive once cooldown finishes
@@ -826,7 +831,11 @@ void runGame(int bossHealth, int interval) {
         system("cls");
     }
 
-    cout << "Game Over!" << endl;
+    if (bossHealth <= 0) {
+        cout << "You Win" << endl;
+    } else {
+        cout << "You Lose!" << endl;
+    }
     Sleep(2000);
 }
 
@@ -838,10 +847,10 @@ int main() {
         int selection = main_menu();
         if (selection==0) { //if selection==0, then start game!
             int easy = 3000, intervalEasy = 60; // easy, medium,
-            int medium = 4500, intervalMed = 45;
-            int hard = 6000, intervalHard = 5;
-//            runNormalGame();
-            runGame(easy, intervalEasy);
+            int medium = 4500, intervalMed = 40;
+            int hard = 6000, intervalHard = 20;
+//             runNormalGame();
+           runGame(easy, intervalEasy);
         } else if (selection==1){
             showLeaderboard();
         } else if (selection==2){
