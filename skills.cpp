@@ -19,28 +19,29 @@ int score = 0;
 string playerName;
 vector<string> playerNames;
 vector<int> scores;
-int destroyLines = 0;
+int mana = 0;
 
 bool skill_1_active = false;
 bool skill_2_active = false;
-bool skill_3_active = false;
 bool doubleDamage = false;
 bool shieldActive = false;
 
-int cdUltimate = 120;
+int cdUltimate = 0;
+int cdSkill1 = 0;
 
 // Tetromino menggunakan vector
 vector<vector<vector<int>>> tetromino = {
-    {{1, 1, 1, 1}},                  // I
-    {{1, 1}, {1, 1}},                // O
-    {{0, 1, 0}, {1, 1, 1}},          // T
-    {{1, 0, 0}, {1, 1, 1}},          // L
-    {{0, 0, 1}, {1, 1, 1}},          // J
-    {{0, 1, 1}, {1, 1, 0}},          // S
-    {{1, 1, 0}, {0, 1, 1}}           // Z
+    {{1, 1, 1, 1}},         // I
+    {{1, 1}, {1, 1}},       // O
+    {{0, 1, 0}, {1, 1, 1}}, // T
+    {{1, 0, 0}, {1, 1, 1}}, // L
+    {{0, 0, 1}, {1, 1, 1}}, // J
+    {{0, 1, 1}, {1, 1, 0}}, // S
+    {{1, 1, 0}, {0, 1, 1}}  // Z
 };
 
-void setColor(int color) {
+void setColor(int color)
+{
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, color);
 }
@@ -59,12 +60,15 @@ int tetrominoColors[7] = {
 };
 
 // Fungsi untuk memutar tetromino ke kanan (90 derajat searah jarum jam)
-vector<vector<int>> rotateMatrix(const vector<vector<int>> &matrix) {
+vector<vector<int>> rotateMatrix(const vector<vector<int>> &matrix)
+{
     int n = matrix.size();
     int m = matrix[0].size();
     vector<vector<int>> rotated(m, vector<int>(n, 0));
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
             rotated[j][n - 1 - i] = matrix[i][j];
         }
     }
@@ -72,15 +76,20 @@ vector<vector<int>> rotateMatrix(const vector<vector<int>> &matrix) {
 }
 
 // Fungsi untuk memeriksa apakah tetromino bisa diputar
-bool canRotate(int arena[height][width], int position_x, int position_y, vector<vector<int>> &rotatedTetromino) {
+bool canRotate(int arena[height][width], int position_x, int position_y, vector<vector<int>> &rotatedTetromino)
+{
     int newHeight = rotatedTetromino.size();
     int newWidth = rotatedTetromino[0].size();
-    for (int i = 0; i < newHeight; i++) {
-        for (int j = 0; j < newWidth; j++) {
-            if (rotatedTetromino[i][j] == 1) {
+    for (int i = 0; i < newHeight; i++)
+    {
+        for (int j = 0; j < newWidth; j++)
+        {
+            if (rotatedTetromino[i][j] == 1)
+            {
                 int newY = position_y + i;
                 int newX = position_x + j;
-                if (newY >= height || newX < 0 || newX >= width || arena[newY][newX] == 7 || arena[newY][newX] == 2) {
+                if (newY >= height || newX < 0 || newX >= width || arena[newY][newX] == 7 || arena[newY][newX] == 2)
+                {
                     return false; // Tidak bisa diputar
                 }
             }
@@ -90,22 +99,32 @@ bool canRotate(int arena[height][width], int position_x, int position_y, vector<
 }
 
 // Fungsi untuk menggambar tetromino di dalam arena
-void summonTetromino(int arena[height][width], int arenaColors[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino, int colorIndex) {
-    for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
-            if (i == 0 || j == 0 || i == height - 1 || j == width - 1) {
+void summonTetromino(int arena[height][width], int arenaColors[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino, int colorIndex)
+{
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            if (i == 0 || j == 0 || i == height - 1 || j == width - 1)
+            {
                 arena[i][j] = 2; // Border
-            } else {
-                if (arena[i][j] != 7) {
-                    arena[i][j] = 0; // Arena kosong
+            }
+            else
+            {
+                if (arena[i][j] != 7)
+                {
+                    arena[i][j] = 0;       // Arena kosong
                     arenaColors[i][j] = 0; // Reset color
                 }
             }
         }
     }
-    for (int i = 0; i < currentTetromino.size(); i++) {
-        for (int j = 0; j < currentTetromino[i].size(); j++) {
-            if (currentTetromino[i][j] == 1) {
+    for (int i = 0; i < currentTetromino.size(); i++)
+    {
+        for (int j = 0; j < currentTetromino[i].size(); j++)
+        {
+            if (currentTetromino[i][j] == 1)
+            {
                 arena[position_y + i][position_x + j] = currentTetromino[i][j];
                 arenaColors[position_y + i][position_x + j] = tetrominoColors[colorIndex];
             }
@@ -114,60 +133,82 @@ void summonTetromino(int arena[height][width], int arenaColors[height][width], i
 }
 
 // Fungsi untuk menggambar arena
-void draw(int arena[height][width], int arenaColors[height][width], vector<vector<int>> &nextTetromino, int currentTetrominoIndex, int nextTetrominoIndex) {
+void draw(int arena[height][width], int arenaColors[height][width], vector<vector<int>> &nextTetromino, int currentTetrominoIndex, int nextTetrominoIndex)
+{
     const int boxHeight = 4;
     const int boxWidth = 4;
     const int horizontalSpacing = 5;
 
-    for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
-            if (arena[i][j] == 1 || arena[i][j] == 7) {
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            if (arena[i][j] == 1 || arena[i][j] == 7)
+            {
                 setColor(arenaColors[i][j]); // ngeset warna tetromino
                 cout << "@";
                 setColor(7); // Reset color ke default
-            } else if (arena[i][j] == 2) {
+            }
+            else if (arena[i][j] == 2)
+            {
                 cout << "#";
-            } else if (arena[i][j] == 4) {
+            }
+            else if (arena[i][j] == 4)
+            {
                 setColor(arenaColors[i][j]);
                 cout << ".";
                 setColor(7);
-            } else {
+            }
+            else
+            {
                 cout << " ";
             }
         }
 
         // Draw the "Next Tetromino" box
         cout << string(horizontalSpacing, ' ');
-        if(i == 1) {
+        if (i == 1)
+        {
             cout << "Score : " << score;
         }
-        if (i == (height / 2 - boxHeight / 2 - 2)) {
+        if (i == (height / 2 - boxHeight / 2 - 2))
+        {
             cout << "Next Tetromino:";
         }
-        if (i >= (height / 2 - boxHeight / 2) && i < (height / 2 + boxHeight / 2)) {
+        if (i >= (height / 2 - boxHeight / 2) && i < (height / 2 + boxHeight / 2))
+        {
             int tetrominoRow = i - (height / 2 - boxHeight / 2);
             cout << "#";
 
-            if (tetrominoRow < nextTetromino.size()) {
+            if (tetrominoRow < nextTetromino.size())
+            {
                 int paddingLeft = (boxWidth - nextTetromino[tetrominoRow].size()) / 2;
                 int paddingRight = boxWidth - nextTetromino[tetrominoRow].size() - paddingLeft;
                 cout << string(paddingLeft, ' ');
 
-                for (int j = 0; j < nextTetromino[tetrominoRow].size(); j++) {
-                    if (nextTetromino[tetrominoRow][j] == 1) {
+                for (int j = 0; j < nextTetromino[tetrominoRow].size(); j++)
+                {
+                    if (nextTetromino[tetrominoRow][j] == 1)
+                    {
                         setColor(tetrominoColors[nextTetrominoIndex]); // Color for next tetromino
                         cout << "@";
                         setColor(7); // Reset
-                    } else {
+                    }
+                    else
+                    {
                         cout << " ";
                     }
                 }
                 cout << string(paddingRight, ' ');
-            } else {
+            }
+            else
+            {
                 cout << string(boxWidth, ' ');
             }
             cout << "#";
-        } else if (i == (height / 2 - boxHeight / 2 - 1) || i == (height / 2 + boxHeight / 2)) {
+        }
+        else if (i == (height / 2 - boxHeight / 2 - 1) || i == (height / 2 + boxHeight / 2))
+        {
             cout << string(boxWidth + 2, '#');
         }
         cout << endl;
@@ -180,16 +221,20 @@ void draw(int arena[height][width], int arenaColors[height][width], vector<vecto
     cout << "'W' to rotate tetromino" << endl;
 }
 
-
-bool canMove(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino) {
+bool canMove(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino)
+{
     int newHeight = currentTetromino.size();
     int newWidth = currentTetromino[0].size();
-    for (int i = 0; i < newHeight; i++) {
-        for (int j = 0; j < newWidth; j++) {
-            if (currentTetromino[i][j] == 1) {
+    for (int i = 0; i < newHeight; i++)
+    {
+        for (int j = 0; j < newWidth; j++)
+        {
+            if (currentTetromino[i][j] == 1)
+            {
                 int newY = position_y + i;
                 int newX = position_x + j;
-                if (newY >= height || newX < 0 || newX >= width || arena[newY][newX] == 7 || arena[newY][newX] == 2) {
+                if (newY >= height || newX < 0 || newX >= width || arena[newY][newX] == 7 || arena[newY][newX] == 2)
+                {
                     return false; // Tidak bisa bergerak
                 }
             }
@@ -198,13 +243,18 @@ bool canMove(int arena[height][width], int position_x, int position_y, vector<ve
     return true;
 }
 
-bool canTurnLeft(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino, int dx) {
+bool canTurnLeft(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino, int dx)
+{
     int newHeight = currentTetromino.size();
     int newWidth = currentTetromino[0].size();
-    for (int i = 0; i < newHeight; i++) {
-        for (int j = 0; j < newWidth; j++) {
-            if (currentTetromino[i][j] == 1) {
-                if (arena[position_y + i][position_x - 1] == 7) {
+    for (int i = 0; i < newHeight; i++)
+    {
+        for (int j = 0; j < newWidth; j++)
+        {
+            if (currentTetromino[i][j] == 1)
+            {
+                if (arena[position_y + i][position_x - 1] == 7)
+                {
                     return false;
                 }
             }
@@ -213,13 +263,18 @@ bool canTurnLeft(int arena[height][width], int position_x, int position_y, vecto
     return true;
 }
 
-bool canTurnRight(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino, int dx) {
+bool canTurnRight(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino, int dx)
+{
     int newHeight = currentTetromino.size();
     int newWidth = currentTetromino[0].size();
-    for (int i = 0; i < newHeight; i++) {
-        for (int j = 0; j < newWidth; j++) {
-            if (currentTetromino[i][j] == 1) {
-                if (arena[position_y + i][position_x + newWidth] == 7) {
+    for (int i = 0; i < newHeight; i++)
+    {
+        for (int j = 0; j < newWidth; j++)
+        {
+            if (currentTetromino[i][j] == 1)
+            {
+                if (arena[position_y + i][position_x + newWidth] == 7)
+                {
                     return false;
                 }
             }
@@ -228,53 +283,73 @@ bool canTurnRight(int arena[height][width], int position_x, int position_y, vect
     return true;
 }
 
-void clearLines(int arena[height][width], int &bossHealth, int arenaColors[height][width]) {
-    for (int i = 1; i < height - 1; i++) {
+void clearLines(int arena[height][width], int &bossHealth)
+{
+    for (int i = 1; i < height - 1; i++)
+    {
         bool fullLine = true;
-        for (int j = 1; j < width - 1; j++) {
-            if (arena[i][j] != 7) {
+        for (int j = 1; j < width - 1; j++)
+        {
+            if (arena[i][j] != 7)
+            {
                 fullLine = false;
                 break;
             }
-            if(doubleDamage == true) {
+        }
+        if (fullLine)
+        {
+            if (doubleDamage == true)
+            {
                 score += 200;
                 bossHealth -= 200;
                 doubleDamage = false;
-            } else {
+            }
+            else
+            {
                 score += 100;
                 bossHealth -= 100;
             }
-            destroyLines++;
+            mana++;
 
-            for (int j = 1; j < width - 1; j++) {
+            for (int j = 1; j < width - 1; j++)
+            {
                 arena[i][j] = 0;
             }
-            for (int k = i; k > 1; k--) {
-                for (int j = 1; j < width - 1; j++) {
+            for (int k = i; k > 1; k--)
+            {
+                for (int j = 1; j < width - 1; j++)
+                {
                     arena[k][j] = arena[k - 1][j];
-                    arenaColors[k][j] = arenaColors[k - 1][j];
                 }
             }
         }
     }
 }
 
-void clearLines(int arena[height][width]) {
-    for (int i = 1; i < height - 1; i++) {
+void clearLines(int arena[height][width])
+{
+    for (int i = 1; i < height - 1; i++)
+    {
         bool fullLine = true;
-        for (int j = 1; j < width - 1; j++) {
-            if (arena[i][j] != 7) {
+        for (int j = 1; j < width - 1; j++)
+        {
+            if (arena[i][j] != 7)
+            {
                 fullLine = false;
                 break;
             }
         }
-        if (fullLine) {
+        if (fullLine)
+        {
             score += 100;
-            for (int j = 1; j < width - 1; j++) {
+            for (int j = 1; j < width - 1; j++)
+            {
                 arena[i][j] = 0;
             }
-            for (int k = i; k > 1; k--) {
-                for (int j = 1; j < width - 1; j++) {
+            for (int k = i; k > 1; k--)
+            {
+                for (int j = 1; j < width - 1; j++)
+                {
                     arena[k][j] = arena[k - 1][j];
                 }
             }
@@ -282,40 +357,51 @@ void clearLines(int arena[height][width]) {
     }
 }
 
-
-bool gameOver(int arena[height][width]) {
-    for (int j = 1; j < width - 1; j++) {
-        if (arena[1][j] == 7) {
+bool gameOver(int arena[height][width])
+{
+    for (int j = 1; j < width - 1; j++)
+    {
+        if (arena[1][j] == 7)
+        {
             return true;
         }
     }
     return false;
 }
 
-void hardDrop(int arena[height][width], vector<vector<int>> currentTetromino, int position_x, int position_y, bool drop, int &temp, int randomTetromino) {
+void hardDrop(int arena[height][width], vector<vector<int>> currentTetromino, int position_x, int position_y, bool drop, int &temp, int randomTetromino)
+{
     int shadowColor = tetrominoColors[randomTetromino];
-    while (canMove(arena, position_x, position_y, currentTetromino)) {
-        if (canMove(arena, position_x, position_y, currentTetromino)) {
+    while (canMove(arena, position_x, position_y, currentTetromino))
+    {
+        if (canMove(arena, position_x, position_y, currentTetromino))
+        {
             position_y++;
         }
     }
 
-    for (int i = 0; i < currentTetromino.size(); i++) {
-        for (int j = 0; j < currentTetromino[i].size(); j++) {
-            if (currentTetromino[i][j] == 1) {
-                if (arena[position_y + i - 1][position_x + j] != 1 && arena[position_y + i - 1][position_x + j] != 7 && arena[position_y + i - 1][position_x + j] != 2) {
+    for (int i = 0; i < currentTetromino.size(); i++)
+    {
+        for (int j = 0; j < currentTetromino[i].size(); j++)
+        {
+            if (currentTetromino[i][j] == 1)
+            {
+                if (arena[position_y + i - 1][position_x + j] != 1 && arena[position_y + i - 1][position_x + j] != 7 && arena[position_y + i - 1][position_x + j] != 2)
+                {
                     arena[position_y + i - 1][position_x + j] = 4;
                     arenaColors[position_y + i - 1][position_x + j] = shadowColor; // Set color for shadow
                 }
             }
-            if (drop) {
+            if (drop)
+            {
                 temp = position_y;
             }
         }
     }
 }
 
-int main_menu() {
+int main_menu()
+{
     int control_x = 0; // Position of ">"
     string arr_mainmenu[3] = {"Play", "Leaderboard", "Exit"};
     char input;
@@ -323,14 +409,15 @@ int main_menu() {
 
     // Get console window dimensions
     CONSOLE_SCREEN_BUFFER_INFO csbi;
-    int console_width, console_height; //idk how tf does this even work, don't bother asking me
+    int console_width, console_height; // idk how tf does this even work, don't bother asking me
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     console_width = csbi.dwSize.X;
     console_height = csbi.dwSize.Y;
 
     const int menu_width = 60; // menu width
 
-    do {
+    do
+    {
         system("cls");
 
         // hitung horizontal padding
@@ -347,11 +434,15 @@ int main_menu() {
         cout << horizontal_padding << "#                                                          #" << endl;
 
         // kontrol untuk optionya
-        for (int i = 0; i < menu_size; i++) {
+        for (int i = 0; i < menu_size; i++)
+        {
             cout << horizontal_padding << "#               ";
-            if (control_x == i) {
+            if (control_x == i)
+            {
                 cout << "> " << arr_mainmenu[i];
-            } else {
+            }
+            else
+            {
                 cout << "  " << arr_mainmenu[i];
             }
             cout << string(41 - arr_mainmenu[i].length(), ' ') << "#" << endl;
@@ -362,10 +453,15 @@ int main_menu() {
         cout << horizontal_padding << "############################################################" << endl;
 
         input = _getch();
-        if (input == 'w' || input == 'W') {
-            if (control_x > 0) control_x--; // Move up
-        } else if (input == 's' || input == 'S') {
-            if (control_x < menu_size - 1) control_x++; // Move down
+        if (input == 'w' || input == 'W')
+        {
+            if (control_x > 0)
+                control_x--; // Move up
+        }
+        else if (input == 's' || input == 'S')
+        {
+            if (control_x < menu_size - 1)
+                control_x++; // Move down
         }
 
     } while (input != '\r'); // ini adalah ascii untuk 'ENTER', dia berhenti kalo enter di tekan
@@ -373,51 +469,62 @@ int main_menu() {
     return control_x;
 }
 
-void loadScores() {
+void loadScores()
+{
     ifstream infile("leaderboard.txt");
     string name;
     int score;
 
-    if (!infile) {
+    if (!infile)
+    {
         cout << "Failed to open leaderboard file." << endl;
         return;
     }
 
-    while (infile >> name >> score) {
+    while (infile >> name >> score)
+    {
         playerNames.push_back(name);
         scores.push_back(score);
     }
     infile.close();
 }
 
-
-void saveScores() {
+void saveScores()
+{
     ofstream outfile("leaderboard.txt");
 
-    for (int i = 0; i < playerNames.size(); ++i) {
+    for (int i = 0; i < playerNames.size(); ++i)
+    {
         outfile << playerNames[i] << " " << scores[i] << endl;
     }
     outfile.close();
 }
 
-void saveScore(int score, const string& playerName) {
+void saveScore(int score, const string &playerName)
+{
     bool playerExists = false;
-    for (int i = 0; i < playerNames.size(); ++i) {
-        if (playerNames[i] == playerName) {
+    for (int i = 0; i < playerNames.size(); ++i)
+    {
+        if (playerNames[i] == playerName)
+        {
             scores[i] += score;
             playerExists = true;
             break;
         }
     }
 
-    if (!playerExists) {
+    if (!playerExists)
+    {
         playerNames.push_back(playerName);
         scores.push_back(score);
     }
 
-    for (size_t i = 0; i < scores.size(); ++i) {
-        for (size_t j = i + 1; j < scores.size(); ++j) {
-            if (scores[i] < scores[j]) {
+    for (size_t i = 0; i < scores.size(); ++i)
+    {
+        for (size_t j = i + 1; j < scores.size(); ++j)
+        {
+            if (scores[i] < scores[j])
+            {
                 swap(scores[i], scores[j]);
                 swap(playerNames[i], playerNames[j]);
             }
@@ -427,7 +534,8 @@ void saveScore(int score, const string& playerName) {
     saveScores();
 }
 
-void showLeaderboard() {
+void showLeaderboard()
+{
     ifstream inFile("leaderboard.txt");
     string name;
     int score;
@@ -435,7 +543,8 @@ void showLeaderboard() {
     string topName;
     int topScore = 0;
 
-    if (!inFile) {
+    if (!inFile)
+    {
         cout << "Failed to open leaderboard file." << endl;
         Sleep(2000);
         return;
@@ -467,20 +576,22 @@ void showLeaderboard() {
 
     cout << endl;
 
-    cout << horizontal_padding <<"+=======================================================+" << endl;
-    cout << horizontal_padding <<"|                 TOP 5 HIGHEST SCORERS                 |" << endl;
-    cout << horizontal_padding <<"+=======================================================+" << endl;
-    cout << horizontal_padding <<"| " << left << setw(4) << "No"
+    cout << horizontal_padding << "+=======================================================+" << endl;
+    cout << horizontal_padding << "|                 TOP 5 HIGHEST SCORERS                 |" << endl;
+    cout << horizontal_padding << "+=======================================================+" << endl;
+    cout << horizontal_padding << "| " << left << setw(4) << "No"
          << "| " << left << setw(15) << "Name"
          << "| " << right << setw(10) << "Score" << "   |                 |" << endl;
-    cout << horizontal_padding <<"+=======================================================+" << endl;
+    cout << horizontal_padding << "+=======================================================+" << endl;
 
-    while (inFile >> name >> score && count <= 5) {
-        cout << horizontal_padding <<"| " << left << setw(4) << count
+    while (inFile >> name >> score && count <= 5)
+    {
+        cout << horizontal_padding << "| " << left << setw(4) << count
              << "| " << left << setw(15) << name
              << "| " << right << setw(10) << score << "   |                 |" << endl;
 
-        if (score > topScore) {
+        if (score > topScore)
+        {
             topScore = score;
             topName = name;
         }
@@ -488,44 +599,51 @@ void showLeaderboard() {
         count++;
     }
 
-    while (count <= 5) {
-        cout << horizontal_padding <<"| " << left << setw(4) << count
+    while (count <= 5)
+    {
+        cout << horizontal_padding << "| " << left << setw(4) << count
              << "| " << left << setw(15) << "-"
              << "| " << right << setw(10) << "0" << "   |                 |" << endl;
         count++;
     }
 
-    cout << horizontal_padding <<"+=======================================================+" << endl;
+    cout << horizontal_padding << "+=======================================================+" << endl;
 
-    if (!topName.empty()) {
-        cout << horizontal_padding <<"| " << left << setw(9) << "              Congratulation to " << topName << "             |" << endl;
-        cout << horizontal_padding <<"| " << left << setw(9) << "              Your highest score is " << topScore << "               |"<< endl;
+    if (!topName.empty())
+    {
+        cout << horizontal_padding << "| " << left << setw(9) << "              Congratulation to " << topName << "             |" << endl;
+        cout << horizontal_padding << "| " << left << setw(9) << "              Your highest score is " << topScore << "               |" << endl;
     }
 
     cout << horizontal_padding << "+=======================================================+" << endl;
-    cout << horizontal_padding <<"|          Press any key to return to menu...           |" << endl;
-    cout << horizontal_padding <<"+=======================================================+" << endl;
+    cout << horizontal_padding << "|          Press any key to return to menu...           |" << endl;
+    cout << horizontal_padding << "+=======================================================+" << endl;
 
     inFile.close();
     getch();
 }
 
-bool canRandom(int randomTetromino, int arena[height][width], int positionX, int positionY) {
+bool canRandom(int randomTetromino, int arena[height][width], int positionX, int positionY)
+{
     vector<vector<int>> currentTetromino = tetromino[randomTetromino];
-    if (canMove(arena, positionX, positionY, currentTetromino)) {
+    if (canMove(arena, positionX, positionY, currentTetromino))
+    {
         return true;
-    } else {
+    }
+    else
+    {
         return false;
     }
 }
 
-void runNormalGame() {
+void runNormalGame()
+{
     int dx = 0;
     int tetromino_y = 1;
     int tetromino_x = rand() % 19 + 1;
     int randomTetromino = rand() % 7;
     vector<vector<int>> currentTetromino = tetromino[randomTetromino]; // vector current tetronimo
-    int nextTetrominoIndex = rand() % 7; // Index untuk tetronimo berikutnya
+    int nextTetrominoIndex = rand() % 7;                               // Index untuk tetronimo berikutnya
     vector<vector<int>> nextTetromino = tetromino[nextTetrominoIndex]; // vector next tetronimo
     int arena[height][width] = {0};
     bool flag = true;
@@ -542,28 +660,41 @@ void runNormalGame() {
 
     system("cls");
 
-    while (!gameOver(arena)) {
+    while (!gameOver(arena))
+    {
         bool drop = false;
-        if (canMove(arena, tetromino_x, tetromino_y, currentTetromino) && flag) {
+        if (canMove(arena, tetromino_x, tetromino_y, currentTetromino) && flag)
+        {
             dx = 0;
-            if (kbhit()) {
+            if (kbhit())
+            {
                 char control = getch();
-                if (control == 'a') {
-                    if (tetromino_x > 1 && canTurnLeft(arena, tetromino_x, tetromino_y, currentTetromino, dx)) {
+                if (control == 'a')
+                {
+                    if (tetromino_x > 1 && canTurnLeft(arena, tetromino_x, tetromino_y, currentTetromino, dx))
+                    {
                         dx = -1;
                         tetromino_x += dx;
                     }
-                } else if (control == 'd') {
-                    if (tetromino_x + currentTetromino[0].size() < width - 1 && canTurnRight(arena, tetromino_x, tetromino_y, currentTetromino, dx)) {
+                }
+                else if (control == 'd')
+                {
+                    if (tetromino_x + currentTetromino[0].size() < width - 1 && canTurnRight(arena, tetromino_x, tetromino_y, currentTetromino, dx))
+                    {
                         dx = 1;
                         tetromino_x += dx;
                     }
-                } else if (control == 'w') { // Rotasi
+                }
+                else if (control == 'w')
+                { // Rotasi
                     vector<vector<int>> rotatedTetromino = rotateMatrix(currentTetromino);
-                    if (canRotate(arena, tetromino_x, tetromino_y, rotatedTetromino)) {
+                    if (canRotate(arena, tetromino_x, tetromino_y, rotatedTetromino))
+                    {
                         currentTetromino = rotatedTetromino;
                     }
-                } else if (control == 's') {
+                }
+                else if (control == 's')
+                {
                     drop = true;
                     flag = false;
                 }
@@ -571,14 +702,21 @@ void runNormalGame() {
 
             summonTetromino(arena, arenaColors, tetromino_x, tetromino_y, currentTetromino, randomTetromino);
 
-            if (counter % 4 == 0) {
+            if (counter % 4 == 0)
+            {
                 tetromino_y++;
             }
-        } else {
-            if (!flag) {
-                for (int i = 0; i < currentTetromino.size(); i++) {
-                    for (int j = 0; j < currentTetromino[0].size(); j++) {
-                        if (currentTetromino[i][j] == 1) {
+        }
+        else
+        {
+            if (!flag)
+            {
+                for (int i = 0; i < currentTetromino.size(); i++)
+                {
+                    for (int j = 0; j < currentTetromino[0].size(); j++)
+                    {
+                        if (currentTetromino[i][j] == 1)
+                        {
                             arena[tetromino_y + i - 1][tetromino_x + j] = 0;
                         }
                     }
@@ -586,9 +724,12 @@ void runNormalGame() {
                 tetromino_y = tempY;
             }
 
-            for (int i = 0; i < currentTetromino.size(); i++) {
-                for (int j = 0; j < currentTetromino[i].size(); j++) {
-                    if (currentTetromino[i][j] == 1) {
+            for (int i = 0; i < currentTetromino.size(); i++)
+            {
+                for (int j = 0; j < currentTetromino[i].size(); j++)
+                {
+                    if (currentTetromino[i][j] == 1)
+                    {
                         arena[tetromino_y + i - 1][tetromino_x + j] = 7;
                         arenaColors[tetromino_y + i - 1][tetromino_x + j] = tetrominoColors[randomTetromino];
                     }
@@ -599,7 +740,7 @@ void runNormalGame() {
             tetromino_x = rand() % 19 + 1;
             randomTetromino = nextTetrominoIndex; // Update the current Tetromino index
             currentTetromino = nextTetromino;
-            nextTetrominoIndex = rand() % 7;     // Generate tindex tetronimo berikutnya
+            nextTetrominoIndex = rand() % 7;               // Generate tindex tetronimo berikutnya
             nextTetromino = tetromino[nextTetrominoIndex]; // Set next Tetromino
             flag = true;
         }
@@ -617,69 +758,64 @@ void runNormalGame() {
     Sleep(2000);
 }
 
-void fillBottomRow(int arena[height][width], int tetromino_y, int tetromino_x, int randomTetromino) {
-    int i = height - 2;
-
-    for (int j = 1; j < width - 1; j++) {
-        arena[i][j] = 7;
-        arenaColors[tetromino_y + i - 1][tetromino_x + j] = tetrominoColors[randomTetromino];
-
+void activatePlayerSkills(char control, int arena[height][width], int &bossHealth)
+{
+    if (control == '1' && mana >= 1)
+    {
+        if (cdSkill1 <= 0)
+        {
+            doubleDamage = true;
+            cdSkill1 = 60;
+            mana--;
+        }
     }
-}
-
-void activateClearBottomRow(int arena[height][width], int &bossHealth) {
-    // sek blm
-    bossHealth -= 100;
-}
-
-void activatePlayerSkills(char control, int arena[height][width], int &bossHealth, int tetrominoY,int  tetrominoX, int randomTetromino) {
-    if (control == '1' && destroyLines >= 1) {
-        doubleDamage = true;
-
-    } else if (control == '2' && destroyLines >= 2) {
-        fillBottomRow(arena, tetrominoY, tetrominoX, randomTetromino);
-
-    } else if (control == '3' && (destroyLines >= 3 && destroyLines % 3 == 0)) {
-        shieldActive = true;
-        if(cdUltimate <= 0) {
+    else if (control == '2' && mana >= 2)
+    {
+        if (cdUltimate <= 0)
+        {
+            shieldActive = true;
             cdUltimate = 120;
+            mana -= 2;
         }
     }
 }
 
-void displaySkillStatus(bool skill_1_active, bool skill_2_active, bool skill_3_active) {
+void displaySkillStatus(bool skill_1_active, bool skill_2_active)
+{
 
     // Cek skill 1
-    if (skill_1_active) {
+    if (skill_1_active && cdSkill1 == 0)
+    {
         cout << "Skill 1 (Double Damage): Active" << endl;
-    } else {
+    }
+    else if (cdSkill1 > 0)
+    {
+        cout << "Skill 1 (Double Damage): Inactive - Coldown : " << cdSkill1 << endl;
+    }
+    else
+    {
         cout << "Skill 1 (Double Damage): Inactive" << endl;
     }
 
     // Cek skill 2
-    if (skill_2_active) {
-        cout << "Skill 2 (Clear Bottom Row): Active" << endl;
-    } else {
-        cout << "Skill 2 (Clear Bottom Row): Inactive" << endl;
+    if (skill_2_active && cdUltimate == 0)
+    {
+        cout << "Skill 2 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
     }
-
-    // Cek skill 3
-    if (skill_3_active) {
-//        cout << "Skill 3 (Shield/Defense): Active" << endl;
-        cout << "Skill 3 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
-    } else {
-        cout << "Skill 3 (Shield/Defense): Inactive" << endl;
+    else
+    {
+        cout << "Skill 2 (Shield/Defense): Inactive" << endl;
     }
-
 }
 
-void runGame(int bossHealth, int interval) {
+void runGame(int bossHealth, int interval)
+{
     int dx = 0;
     int tetromino_y = 1;
     int tetromino_x = rand() % 19 + 1;
     int randomTetromino = rand() % 7;
     vector<vector<int>> currentTetromino = tetromino[randomTetromino]; // vector current tetronimo
-    int nextTetrominoIndex = rand() % 7; // Index untuk tetronimo berikutnya
+    int nextTetrominoIndex = rand() % 7;                               // Index untuk tetronimo berikutnya
     vector<vector<int>> nextTetromino = tetromino[nextTetrominoIndex]; // vector next tetronimo
     int arena[height][width] = {0};
     bool flag = true, muteMove = true;
@@ -699,40 +835,57 @@ void runGame(int bossHealth, int interval) {
 
     system("cls");
 
-    while (!gameOver(arena) && bossHealth > 0) {
+    while (!gameOver(arena))
+    {
         bool drop = false;
-        if (canMove(arena, tetromino_x, tetromino_y, currentTetromino) && flag) {
+        if (canMove(arena, tetromino_x, tetromino_y, currentTetromino) && flag)
+        {
             dx = 0;
-            if (kbhit()) {
+            if (kbhit())
+            {
                 char control = getch();
 
-                if (muteMove) {
+                if (muteMove)
+                {
 
-                    if (control == 'a') {
-                        if (tetromino_x > 1 && canTurnLeft(arena, tetromino_x, tetromino_y, currentTetromino, dx)) {
+                    if (control == 'a')
+                    {
+                        if (tetromino_x > 1 && canTurnLeft(arena, tetromino_x, tetromino_y, currentTetromino, dx))
+                        {
                             dx = -1;
                             tetromino_x += dx;
                         }
-                    } else if (control == 'd') {
-                        if (tetromino_x + currentTetromino[0].size() < width - 1 && canTurnRight(arena, tetromino_x, tetromino_y, currentTetromino, dx)) {
+                    }
+                    else if (control == 'd')
+                    {
+                        if (tetromino_x + currentTetromino[0].size() < width - 1 && canTurnRight(arena, tetromino_x, tetromino_y, currentTetromino, dx))
+                        {
                             dx = 1;
                             tetromino_x += dx;
                         }
-                    } else if (control == 'w') { // Rotasi
+                    }
+                    else if (control == 'w')
+                    { // Rotasi
                         vector<vector<int>> rotatedTetromino = rotateMatrix(currentTetromino);
-                        if (canRotate(arena, tetromino_x, tetromino_y, rotatedTetromino)) {
+                        if (canRotate(arena, tetromino_x, tetromino_y, rotatedTetromino))
+                        {
                             currentTetromino = rotatedTetromino;
                         }
-                    } else if (control == 's') {
+                    }
+                    else if (control == 's')
+                    {
                         drop = true;
                         flag = false;
-                    } else if(control == '1' || control == '2' || control == '3') {
-                        activatePlayerSkills(control, arena, bossHealth, tetromino_y, tetromino_x, randomTetromino);
-                        hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
                     }
-
-                } else {
-                    if (control == 's') {
+                    else if (control == '1' || control == '2' || control == '3')
+                    {
+                        activatePlayerSkills(control, arena, bossHealth);
+                    }
+                }
+                else
+                {
+                    if (control == 's')
+                    {
                         drop = true;
                         flag = false;
                     }
@@ -741,39 +894,56 @@ void runGame(int bossHealth, int interval) {
 
             summonTetromino(arena, arenaColors, tetromino_x, tetromino_y, currentTetromino, randomTetromino);
 
-            if (counter % 4 == 0) {
+            if (counter % 4 == 0)
+            {
                 tetromino_y++;
             }
 
-            if (counter % interval == 0) { // interval kapan boss nyerang
+            if (counter % interval == 0)
+            { // interval kapan boss nyerang
                 int changeTetromino = rand() % 7;
                 muteMove = true;
-                do {
+                do
+                {
                     randomSkill = rand() % 4 + 1;
-                } while((randomSkill == 3 && bossHealth + 50 > limitHealth) || (randomSkill == 1 && !canRandom(changeTetromino, arena, tetromino_x, tetromino_y)));
+                } while ((randomSkill == 3 && bossHealth + 50 > limitHealth) || (randomSkill == 1 && !canRandom(changeTetromino, arena, tetromino_x, tetromino_y)));
 
-                if (shieldActive) {
+                if (shieldActive)
+                {
                     cout << "Boss skill blocked by Shield!" << endl;
-                } else {
-                    if (randomSkill == 1) { // Skill1: ngubah bentuk tetromino
+                }
+                else
+                {
+                    if (randomSkill == 1)
+                    { // Skill1: ngubah bentuk tetromino
                         currentTetromino = tetromino[changeTetromino];
-                    } else if (randomSkill == 2) { // Skill2: Langsung jatuhin Tetromino
+                    }
+                    else if (randomSkill == 2)
+                    { // Skill2: Langsung jatuhin Tetromino
                         drop = true;
                         flag = false;
-                    } else if (randomSkill == 3) { // Skill3: Nambah darah boss
+                    }
+                    else if (randomSkill == 3)
+                    { // Skill3: Nambah darah boss
                         bossHealth += 50;
-                    } else { // Skill4: blokir player move
+                    }
+                    else
+                    { // Skill4: blokir player move
                         muteMove = false;
                     }
                 }
-
             }
-
-        } else {
-            if (!flag) {
-                for (int i = 0; i < currentTetromino.size(); i++) {
-                    for (int j = 0; j < currentTetromino[0].size(); j++) {
-                        if (currentTetromino[i][j] == 1) {
+        }
+        else
+        {
+            if (!flag)
+            {
+                for (int i = 0; i < currentTetromino.size(); i++)
+                {
+                    for (int j = 0; j < currentTetromino[0].size(); j++)
+                    {
+                        if (currentTetromino[i][j] == 1)
+                        {
                             arena[tetromino_y + i - 1][tetromino_x + j] = 0;
                         }
                     }
@@ -781,9 +951,12 @@ void runGame(int bossHealth, int interval) {
                 tetromino_y = tempY;
             }
 
-            for (int i = 0; i < currentTetromino.size(); i++) {
-                for (int j = 0; j < currentTetromino[i].size(); j++) {
-                    if (currentTetromino[i][j] == 1) {
+            for (int i = 0; i < currentTetromino.size(); i++)
+            {
+                for (int j = 0; j < currentTetromino[i].size(); j++)
+                {
+                    if (currentTetromino[i][j] == 1)
+                    {
                         arena[tetromino_y + i - 1][tetromino_x + j] = 7;
                         arenaColors[tetromino_y + i - 1][tetromino_x + j] = tetrominoColors[randomTetromino];
                     }
@@ -794,85 +967,97 @@ void runGame(int bossHealth, int interval) {
             tetromino_x = rand() % 19 + 1;
             randomTetromino = nextTetrominoIndex; // Update the current Tetromino index
             currentTetromino = nextTetromino;
-            nextTetrominoIndex = rand() % 7;     // Generate index tetronimo berikutnya
+            nextTetrominoIndex = rand() % 7;               // Generate index tetronimo berikutnya
             nextTetromino = tetromino[nextTetrominoIndex]; // Set next Tetromino
             muteMove = true;
             flag = true;
         }
 
-
-
         counter++; // buat nambah detik
-        cout << "destroy : " << destroyLines << endl;
+        cout << "destroy : " << mana << endl;
         cout << "Boss Health: " << bossHealth << endl;
         hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
         draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex);
-        clearLines(arena, bossHealth, arenaColors);
+        clearLines(arena, bossHealth);
 
-        if(shieldActive) {
-            if(cdUltimate > 0) {
+        // cd berkurang
+        if (shieldActive)
+        {
+            if (cdUltimate > 0)
+            {
                 cdUltimate--;
             }
-            else {
+            else
+            {
                 shieldActive = false;
             }
         }
 
-        // Update status skill menggunakan if-if
-        if (destroyLines >= 1) {
+        if (cdSkill1 > 0)
+        {
+            cdSkill1--;
+        }
+
+        // kriteria skill
+        if (mana >= 1)
+        {
             skill_1_active = true;
-        } else {
+        }
+        else
+        {
             skill_1_active = false;
         }
 
-        if (destroyLines >= 2) {
-            skill_2_active = true;
-        } else {
-            skill_2_active = false;
-        }
-
-         if (destroyLines >= 3 && destroyLines % 3 == 0) {
-            if (cdUltimate > 0) {
-                skill_3_active = true; // Still active while cooldown runs
-            } else {
-                skill_3_active = false; // Inactive once cooldown finishes
+        if (mana >= 2 && mana % 2 == 0)
+        {
+            if (cdUltimate > 0)
+            {
+                skill_2_active = true; // Still active while cooldown runs
             }
-        } else {
-            skill_3_active = false; // Inactive if destroy < 3
+            else
+            {
+                skill_2_active = false; // Inactive once cooldown finishes
+            }
+        }
+        else
+        {
+            skill_2_active = false; // Inactive if destroy < 3
         }
 
-        displaySkillStatus(skill_1_active, skill_2_active, skill_3_active);
+        displaySkillStatus(skill_1_active, skill_2_active);
         Sleep(100);
         system("cls");
     }
 
-    if (bossHealth > 0) {
-        cout << "Better luck next time" << endl;
-    } else {
-        cout << "Congratulations You WIn" << endl;
-    }
+    cout << "Game Over!" << endl;
     Sleep(2000);
 }
 
-int main() {
+int main()
+{
     srand(time(0));
     loadScores();
 
-    while (true){
+    while (true)
+    {
         int selection = main_menu();
-        if (selection==0) { //if selection==0, then start game!
+        if (selection == 0)
+        {                                       // if selection==0, then start game!
             int easy = 3000, intervalEasy = 60; // easy, medium,
             int medium = 4500, intervalMed = 45;
             int hard = 6000, intervalHard = 5;
-        //    runNormalGame();
+            //            runNormalGame();
             runGame(easy, intervalEasy);
-        } else if (selection==1){
+        }
+        else if (selection == 1)
+        {
             showLeaderboard();
-        } else if (selection==2){
+        }
+        else if (selection == 2)
+        {
             break;
         }
     }
-
 
     return 0;
 }
