@@ -254,7 +254,6 @@ bool canTurnRight(int arena[height][width], int position_x, int position_y, vect
                  for (int j = 1; j < width - 1; j++) {
                      arena[k][j] = arena[k - 1][j];
                      arenaColors[k][j] = arenaColors[k - 1][j];
-
                  }
              }
          }
