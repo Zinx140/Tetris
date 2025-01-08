@@ -1,0 +1,229 @@
+#include <iostream>
+#include <conio.h>
+#include <cstdlib>
+#include <windows.h>
+#include <time.h>
+#include <vector>
+#include <conio.h>
+#include <windows.h>
+#include <fstream>
+#include <algorithm>
+#include <iomanip>
+#include <thread>
+#include <chrono>
+
+using namespace std;
+
+void setColor(int color) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, color);
+}
+
+void boss_default() {
+    cout << "   .-----------------------." << endl;
+    cout << "  /                         \\" << endl;
+    cout << " /     ____           ____   \\" << endl;
+    cout << "|    //----\\\\       //----\\\\  |" << endl;
+    cout << "|    ||    ||       ||    ||  |" << endl;
+    cout << "|    ||  * ||       || *  ||  |" << endl;
+    cout << "|    ||____||_______||____||  |" << endl;
+    cout << "|    \\\\____//       \\\\____//  |" << endl;
+    cout << " \\___         _____        ___/" << endl;
+    cout << "     /__               __\\" << endl;
+    cout << "    |   |_____________|   |" << endl;
+    cout << "    |   || * * * * * ||   |" << endl;
+    cout << "    |   || * * * * * ||   |" << endl;
+    cout << "    |___||___________||___|" << endl;
+    cout << "     \\\\_|||         |||_//" << endl;
+    cout << "       \\\\||         ||//" << endl;
+    cout << "         -|_________|-'" << endl;
+    cout << "          '---------' " << endl;
+}
+
+void boss_mouth() {
+    cout << "   .-----------------------." << endl;
+    cout << "  /                         \\" << endl;
+    cout << " /     ____           ____   \\" << endl;
+    cout << "|    //----\\\\       //----\\\\  |" << endl;
+    cout << "|    ||    ||       ||    ||  |" << endl;
+    cout << "|    ||  * ||       || *  ||  |" << endl;
+    cout << "|    ||____||_______||____||  |" << endl;
+    cout << "|    \\\\____//       \\\\____//  |" << endl;
+    cout << " \\___         _____        ___/" << endl;
+    cout << "     /__               __\\" << endl;
+    cout << "    |   |_____________|   |" << endl;
+    cout << "    |   || * * * * * ||   |" << endl;
+    cout << "    |   ||           ||   |" << endl;
+    cout << "    |   ||           ||   |" << endl;
+    cout << "    |   || * * * * * ||   |" << endl;
+    cout << "    |___||___________||___|" << endl;
+    cout << "     \\\\_|||         |||_//" << endl;
+    cout << "       \\\\||         ||//" << endl;
+    cout << "         -|_________|-'" << endl;
+    cout << "          '---------' " << endl;
+}
+
+void boss_look_right() {
+    cout << "   .-----------------------." << endl;
+    cout << "  /                         \\" << endl;
+    cout << " /     ____           ____   \\" << endl;
+    cout << "|    //----\\\\       //----\\\\  |" << endl;
+    cout << "|    ||    ||       ||    ||  |" << endl;
+    cout << "|    ||  > ||       ||  > ||  |" << endl;
+    cout << "|    ||____||_______||____||  |" << endl;
+    cout << "|    \\\\____//       \\\\____//  |" << endl;
+    cout << " \\___         _____        ___/" << endl;
+    cout << "     /__               __\\" << endl;
+    cout << "    |   |_____________|   |" << endl;
+    cout << "    |   || * * * * * ||   |" << endl;
+    cout << "    |   || * * * * * ||   |" << endl;
+    cout << "    |___||___________||___|" << endl;
+    cout << "     \\\\_|||         |||_//" << endl;
+    cout << "       \\\\||         ||//" << endl;
+    cout << "         -|_________|-'" << endl;
+    cout << "          '---------' " << endl;
+}
+
+void boss_look_left() {
+    cout << "   .-----------------------." << endl;
+    cout << "  /                         \\" << endl;
+    cout << " /     ____           ____   \\" << endl;
+    cout << "|    //----\\\\       //----\\\\  |" << endl;
+    cout << "|    ||    ||       ||    ||  |" << endl;
+    cout << "|    || <  ||       || <  ||  |" << endl;
+    cout << "|    ||____||_______||____||  |" << endl;
+    cout << "|    \\\\____//       \\\\____//  |" << endl;
+    cout << " \\___         _____        ___/" << endl;
+    cout << "     /__               __\\" << endl;
+    cout << "    |   |_____________|   |" << endl;
+    cout << "    |   || * * * * * ||   |" << endl;
+    cout << "    |   || * * * * * ||   |" << endl;
+    cout << "    |___||___________||___|" << endl;
+    cout << "     \\\\_|||         |||_//" << endl;
+    cout << "       \\\\||         ||//" << endl;
+    cout << "         -|_________|-'" << endl;
+    cout << "          '---------' " << endl;
+}
+
+void boss_damaged() {
+    cout << "   .-----------------------." << endl;
+    cout << "  /                         \\" << endl;
+    cout << " /     ____           ____   \\" << endl;
+    cout << "|    //----\\\\       //----\\\\  |" << endl;
+    cout << "|    ||    ||       ||    ||  |" << endl;
+    cout << "|    ||  x ||       ||  x ||  |" << endl;
+    cout << "|    ||____||_______||____||  |" << endl;
+    cout << "|    \\\\____//       \\\\____//  |" << endl;
+    cout << " \\___         _____        ___/" << endl;
+    cout << "     /__               __\\" << endl;
+    cout << "    |   |_____________|   |" << endl;
+    cout << "    |   || * *   * * ||   |" << endl;
+    cout << "    |   || * *   * * ||   |" << endl;
+    cout << "    |___||___________||___|" << endl;
+    cout << "     \\\\_|||         |||_//" << endl;
+    cout << "       \\\\||         ||//" << endl;
+    cout << "         -|_________|-'" << endl;
+    cout << "          '---------' " << endl;
+}
+
+void boss_skill() {
+    setColor(7);
+    cout << "   .-----------------------." << endl;
+    cout << "  /                         \\" << endl;
+    cout << " /     ____           ____   \\" << endl;
+    cout << "|    //----\\\\       //----\\\\  |" << endl;
+    cout << "|    ||    ||       ||    ||  |" << endl;
+    cout << "|    ||  * ||       || ";
+    setColor(4);
+    cout << "*  ||  |" << endl;
+    setColor(7);
+    cout << "|    ||____||_______||____||  |" << endl;
+    cout << "|    \\\\____//       \\\\____//  |" << endl;
+    cout << " \\___         _____        ___/" << endl;
+    cout << "     /__               __\\" << endl;
+    cout << "    |   |_____________|   |" << endl;
+    cout << "    |   || * * * * * ||   |" << endl;
+    cout << "    |   || * * * * * ||   |" << endl;
+    cout << "    |___||___________||___|" << endl;
+    cout << "     \\\\_|||         |||_//" << endl;
+    cout << "       \\\\||         ||//" << endl;
+    cout << "         -|_________|-'" << endl;
+    cout << "          '---------' " << endl;
+}
+
+
+void boss_heal() {
+    setColor(2);
+    cout << "   .-----------------------." << endl;
+    cout << "  /                         \\" << endl;
+    cout << " /     ____           ____   \\" << endl;
+    cout << "|    //----\\\\       //----\\\\  |" << endl;
+    cout << "|    ||    ||       ||    ||  |" << endl;
+    cout << "|    ||  * ||       || *  ||  |" << endl;
+    cout << "|    ||____||_______||____||  |" << endl;
+    cout << "|    \\\\____//       \\\\____//  |" << endl;
+    cout << " \\___         _____        ___/" << endl;
+    cout << "     /__               __\\" << endl;
+    cout << "    |   |_____________|   |" << endl;
+    cout << "    |   || * * * * * ||   |" << endl;
+    cout << "    |   || * * * * * ||   |" << endl;
+    cout << "    |___||___________||___|" << endl;
+    cout << "     \\\\_|||         |||_//" << endl;
+    cout << "       \\\\||         ||//" << endl;
+    cout << "         -|_________|-'" << endl;
+    cout << "          '---------' " << endl;
+    setColor(7); // Reset to default color
+}
+
+void display_boss_random() {
+    srand((unsigned int)time(NULL));
+
+    while (true) {
+        int randomAction = rand() % 4;
+        int randomMovement = rand() % 2;
+        system("cls");
+        if (randomMovement == 1){
+            cout << endl;
+        }
+        switch (randomAction) {
+            case 0:
+                boss_look_left();
+                break;
+            case 1:
+                boss_look_right();
+                break;
+            case 2:
+                boss_mouth();
+                break;
+            case 3:
+                boss_default();
+                break;
+        }
+        this_thread::sleep_for(chrono::seconds(3));
+    }
+}
+
+int main()
+{
+    thread bossThread(display_boss_random);
+    bossThread.detach();
+
+    while (true) {
+        if (_kbhit()) {
+            char key = _getch();
+            system("cls");
+            switch (key) {
+                case '1':
+                    boss_damaged(); // kalo destroy nambah pick
+                    break;
+                case '2':
+                    boss_skill(); // kalo pake skill pick
+                    break;
+                case '3':
+                    boss_heal(); // kalo heal pick
+                    break;
+            }
+        }
+    }
+    return 0;
+}
