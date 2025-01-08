@@ -671,7 +671,6 @@ void displaySkillStatus(bool skill_1_active, bool skill_2_active, bool skill_3_a
         cout << "Skill 3 (Shield/Defense): Inactive" << endl;
     }
 
-
 }
 
 void runGame(int bossHealth, int interval) {
@@ -730,8 +729,6 @@ void runGame(int bossHealth, int interval) {
                     } else if(control == '1' || control == '2' || control == '3') {
                         activatePlayerSkills(control, arena, bossHealth, tetromino_y, tetromino_x, randomTetromino);
                         hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
-                        draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex);
-                        clearLines(arena, bossHealth, arenaColors);
                     }
 
                 } else {
