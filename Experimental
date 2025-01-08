@@ -25,11 +25,12 @@ int destroyLines = 0;
 bool isBossMode = false;
 bool skill_1_active = false;
 bool skill_2_active = false;
-bool skill_3_active = false;
 bool doubleDamage = false;
 bool shieldActive = false;
-int cdUltimate = 120;
 
+int cdUltimate = 0;
+int cdSkill1 = 0;
+int mana = 0;
 // Tetromino menggunakan vector
 vector<vector<vector<int>>> tetromino = {
     {{1, 1, 1, 1}},                  // I
@@ -50,6 +51,16 @@ void playSound(const string &filename) {
     if (!PlaySound(filename.c_str(), NULL, SND_FILENAME | SND_ASYNC)) {
         cerr << "Error playing sound: " << filename << endl;
     }
+}
+
+void playMusic(const string &filename) {
+    if (!PlaySound(filename.c_str(), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP)) {
+        cerr << "Error playing sound: " << filename << endl;
+    }
+}
+
+void stopMusic() {
+    PlaySound(NULL, NULL, 0);  // Stop any sound that is playing
 }
 
 void setFullScreenMode() {
@@ -80,6 +91,27 @@ void setFullScreenMode() {
             SetConsoleDisplayMode(hOut, CONSOLE_FULLSCREEN_MODE, NULL);
         }
     }
+}
+
+void boss_default() {
+    cout << " ,-----------------------." << endl;
+    cout << "  /                         \\" << endl;
+    cout << " /     ____           ____   \\" << endl;
+    cout << "|    //----\\\\       //----\\\\  |" << endl;
+    cout << "|    ||    ||       ||    ||  |" << endl;
+    cout << "|    ||  * ||       ||  * ||  |" << endl;
+    cout << "|    ||____||_______||____||  |" << endl;
+    cout << "|     \\\\____//       \\\\____//  |" << endl;
+    cout << " \\___       _______       ___/" << endl;
+    cout << "     /__               __\\" << endl;
+    cout << "    |   |_____________|   |" << endl;
+    cout << "    |   ||           ||   |" << endl;
+    cout << "    |   ||           ||   |" << endl;
+    cout << "    |___||___________||___|" << endl;
+    cout << "     \\\\_|||         |||_//" << endl;
+    cout << "       \\\\||         ||//" << endl;
+    cout << "        -|_________|-'" << endl;
+    cout << "          ---------' " << endl;
 }
 
 int arenaColors[height][width] = {0};
@@ -284,7 +316,7 @@ bool canTurnRight(int arena[height][width], int position_x, int position_y, vect
     return true;
 }
 
-void clearLines(int arena[height][width], int &bossHealth, int arenaColors[height][width]) {
+void clearLines(int arena[height][width], int &bossHealth) {
     for (int i = 1; i < height - 1; i++) {
         bool fullLine = true;
         for (int j = 1; j < width - 1; j++) {
@@ -292,6 +324,8 @@ void clearLines(int arena[height][width], int &bossHealth, int arenaColors[heigh
                 fullLine = false;
                 break;
             }
+        }
+        if (fullLine) {
             if(doubleDamage == true) {
                 score += 200;
                 bossHealth -= 200;
@@ -300,7 +334,7 @@ void clearLines(int arena[height][width], int &bossHealth, int arenaColors[heigh
                 score += 100;
                 bossHealth -= 100;
             }
-            destroyLines++;
+            mana++;
 
             for (int j = 1; j < width - 1; j++) {
                 arena[i][j] = 0;
@@ -308,7 +342,6 @@ void clearLines(int arena[height][width], int &bossHealth, int arenaColors[heigh
             for (int k = i; k > 1; k--) {
                 for (int j = 1; j < width - 1; j++) {
                     arena[k][j] = arena[k - 1][j];
-                    arenaColors[k][j] = arenaColors[k - 1][j];
                 }
             }
         }
@@ -636,7 +669,7 @@ void showLeaderboard() {
 
     system("cls");
 
-    playSound("music/leaderboard.wav");
+    playMusic("music/leaderboard.wav");
 
     string horizontal_padding((console_width - menu_width) / 2, ' ');
 
@@ -841,15 +874,11 @@ void runNormalGame(const string& playerName) {
 
     system("cls");
 
-//    cout << "Enter Your Name : ";
-//    cin >> playerName;
-//
-//    cout << "Have Fun Playing!" << endl;
     Sleep(1500);
 
     system("cls");
 
-    playSound("music/MainTheme.wav");
+    playMusic("music/MainTheme.wav");
 
     while (!gameOver(arena)) {
         bool drop = false;
@@ -926,59 +955,39 @@ void runNormalGame(const string& playerName) {
     Sleep(2000);
 }
 
-void fillBottomRow(int arena[height][width], int tetromino_y, int tetromino_x, int randomTetromino) {
-    int i = height - 2;
-
-    for (int j = 1; j < width - 1; j++) {
-        arena[i][j] = 7;
-        arenaColors[tetromino_y + i - 1][tetromino_x + j] = tetrominoColors[randomTetromino];
-
-    }
-}
-
-void activateClearBottomRow(int arena[height][width], int &bossHealth) {
-    // sek blm
-    bossHealth -= 100;
-}
-
-void activatePlayerSkills(char control, int arena[height][width], int &bossHealth, int tetrominoY,int  tetrominoX, int randomTetromino) {
-    if (control == '1' && destroyLines >= 1) {
-        doubleDamage = true;
-
-    } else if (control == '2' && destroyLines >= 2) {
-        fillBottomRow(arena, tetrominoY, tetrominoX, randomTetromino);
-
-    } else if (control == '3' && (destroyLines >= 3 && destroyLines % 3 == 0)) {
-        shieldActive = true;
+void activatePlayerSkills(char control, int arena[height][width], int &bossHealth) {
+    if (control == '1' && mana >= 1) {
+        if(cdSkill1 <= 0) {
+            doubleDamage = true;
+            cdSkill1 = 60;
+            mana--;
+        }
+    } else if (control == '2' && mana >= 2) {
         if(cdUltimate <= 0) {
+            shieldActive = true;
             cdUltimate = 120;
+            mana -= 2;
         }
     }
 }
 
-void displaySkillStatus(bool skill_1_active, bool skill_2_active, bool skill_3_active) {
+void displaySkillStatus(bool skill_1_active, bool skill_2_active) {
     const int skillBoxWidth = 73;
 
     // Cek skill 1
-    if (skill_1_active) {
+    if (skill_1_active && cdSkill1 == 0) {
         cout << string(skillBoxWidth, ' ') << "Skill 1 (Double Damage): Active" << endl;
+    } else if (cdSkill1 > 0) {
+        cout << string(skillBoxWidth, ' ') << "Skill 1 (Double Damage): Inactive - Coldown : " << cdSkill1 << endl;
     } else {
         cout << string(skillBoxWidth, ' ') << "Skill 1 (Double Damage): Inactive" << endl;
     }
 
     // Cek skill 2
-    if (skill_2_active) {
-        cout << string(skillBoxWidth, ' ') << "Skill 2 (Clear Bottom Row): Active" << endl;
+    if (skill_2_active && cdUltimate == 0) {
+        cout << string(skillBoxWidth, ' ') << "Skill 2 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
     } else {
-        cout << string(skillBoxWidth, ' ') << "Skill 2 (Clear Bottom Row): Inactive" << endl;
-    }
-
-    // Cek skill 3
-    if (skill_3_active) {
-//        cout << "Skill 3 (Shield/Defense): Active" << endl;
-        cout << string(skillBoxWidth, ' ') << "Skill 3 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
-    } else {
-        cout << string(skillBoxWidth, ' ') << "Skill 3 (Shield/Defense): Inactive" << endl;
+        cout << string(skillBoxWidth, ' ') << "Skill 2 (Shield/Defense): Inactive" << endl;
     }
 }
 
@@ -1037,10 +1046,7 @@ void runGame(int bossHealth, int interval) {
                         drop = true;
                         flag = false;
                     } else if(control == '1' || control == '2' || control == '3') {
-                        activatePlayerSkills(control, arena, bossHealth, tetromino_y, tetromino_x, randomTetromino);
-                        hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
-                        draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex, true);
-                        clearLines(arena, bossHealth, arenaColors);
+                        activatePlayerSkills(control, arena, bossHealth);
                     }
 
                 } else {
@@ -1119,7 +1125,7 @@ void runGame(int bossHealth, int interval) {
         cout << "Boss Health: " << bossHealth << endl;
         hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
         draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex, true);
-        clearLines(arena, bossHealth, arenaColors);
+        clearLines(arena, bossHealth);
 
         if(shieldActive) {
             if(cdUltimate > 0) {
@@ -1130,30 +1136,24 @@ void runGame(int bossHealth, int interval) {
             }
         }
 
-        // Update status skill menggunakan if-if
-        if (destroyLines >= 1) {
+        //kriteria skill
+        if (mana >= 1) {
             skill_1_active = true;
         } else {
             skill_1_active = false;
         }
 
-        if (destroyLines >= 2) {
-            skill_2_active = true;
-        } else {
-            skill_2_active = false;
-        }
-
-         if (destroyLines >= 3 && destroyLines % 3 == 0) {
+        if (mana >= 2) {
             if (cdUltimate > 0) {
-                skill_3_active = true; // Still active while cooldown runs
+                skill_2_active = true; // Still active while cooldown runs
             } else {
-                skill_3_active = false; // Inactive once cooldown finishes
+                skill_2_active = false; // Inactive once cooldown finishes
             }
         } else {
-            skill_3_active = false; // Inactive if destroy < 3
+            skill_2_active = false; // Inactive if mana < 2
         }
 
-        displaySkillStatus(skill_1_active, skill_2_active, skill_3_active);
+        displaySkillStatus(skill_1_active, skill_2_active);
         Sleep(100);
         system("cls");
     }
@@ -1181,6 +1181,7 @@ int main() {
     int start_line = 5; // Starting line for the submenu
 
     while (true){
+    stopMusic();
     int selection_menu = main_menu(console_width, menu_width);
     int easy = 3000, intervalEasy = 60; // easy, medium,
     int medium = 4500, intervalMed = 45;
