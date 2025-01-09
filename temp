@@ -9,6 +9,8 @@
 #include <fstream>
 #include <algorithm>
 #include <iomanip>
+#include <thread>
+#include <chrono>
 
 using namespace std;
 
@@ -23,11 +25,193 @@ int destroyLines = 0;
 bool isBossMode = false;
 bool skill_1_active = false;
 bool skill_2_active = false;
-bool skill_3_active = false;
 bool doubleDamage = false;
 bool shieldActive = false;
+bool skillReady = false; //biar skillnya konsisten
+int currentBossSkill = 0;
+int cdUltimate = 0;
+int cdSkill1 = 0;
+int mana = 0;
 
-int cdUltimate = 120;
+bool isPlayerSkillUsed = false;
+int  playerSkillID = 0;
+
+int getConsoleWidth() {
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
+        return csbi.dwSize.X; // The width of the console in characters
+    }
+    return 80; // Default fallback if function fails
+}
+
+void setColor(int color) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, color);
+}
+
+string boss_default[] = {
+    "   .-----------------------.",
+    "  /                         \\",
+    " /     ____           ____   \\",
+    "|    //----\\\\       //----\\\\  |",
+    "|    ||    ||       ||    ||  |",
+    "|    ||  * ||       || *  ||  |",
+    "|    ||____||_______||____||  |",
+    "|    \\\\____//       \\\\____//  |",
+    " \\___         _____        ___/",
+    "     /__               __\\",
+    "    |   |_____________|   |",
+    "    |   || * * * * * ||   |",
+    "    |   || * * * * * ||   |",
+    "    |___||___________||___|",
+    "     \\\\_|||         |||_//",
+    "       \\\\||         ||//",
+    "         -|_________|-'",
+    "          '---------' ",
+    "",
+    "",
+};
+
+string boss_mouth[] = {
+    "   .-----------------------.",
+    "  /                         \\",
+    " /     ____           ____   \\",
+    "|    //----\\\\       //----\\\\  |",
+    "|    ||    ||       ||    ||  |",
+    "|    ||  * ||       || *  ||  |",
+    "|    ||____||_______||____||  |",
+    "|    \\\\____//       \\\\____//  |",
+    " \\___         _____        ___/",
+    "     /__               __\\",
+    "    |   |_____________|   |",
+    "    |   || * * * * * ||   |",
+    "    |   ||           ||   |",
+    "    |   ||           ||   |",
+    "    |   || * * * * * ||   |",
+    "    |___||___________||___|",
+    "     \\\\_|||         |||_//",
+    "       \\\\||         ||//",
+    "         -|_________|-'",
+    "          '---------' "
+};
+
+string boss_look_right[] = {
+    "   .-----------------------.",
+    "  /                         \\",
+    " /     ____           ____   \\",
+    "|    //----\\\\       //----\\\\  |",
+    "|    ||    ||       ||    ||  |",
+    "|    ||  > ||       ||  > ||  |",
+    "|    ||____||_______||____||  |",
+    "|    \\\\____//       \\\\____//  |",
+    " \\___         _____        ___/",
+    "     /__               __\\",
+    "    |   |_____________|   |",
+    "    |   || * * * * * ||   |",
+    "    |   || * * * * * ||   |",
+    "    |___||___________||___|",
+    "     \\\\_|||         |||_//",
+    "       \\\\||         ||//",
+    "         -|_________|-'",
+    "          '---------' ",
+    "",
+    "",
+};
+
+string boss_look_left[] = {
+    "   .-----------------------.",
+    "  /                         \\",
+    " /     ____           ____   \\",
+    "|    //----\\\\       //----\\\\  |",
+    "|    ||    ||       ||    ||  |",
+    "|    || <  ||       || <  ||  |",
+    "|    ||____||_______||____||  |",
+    "|    \\\\____//       \\\\____//  |",
+    " \\___         _____        ___/",
+    "     /__               __\\",
+    "    |   |_____________|   |",
+    "    |   || * * * * * ||   |",
+    "    |   || * * * * * ||   |",
+    "    |___||___________||___|",
+    "     \\\\_|||         |||_//",
+    "       \\\\||         ||//",
+    "         -|_________|-'",
+    "          '---------' ",
+    "",
+    "",
+};
+
+string boss_damaged[] = {
+    "   .-----------------------.",
+    "  /                         \\",
+    " /     ____           ____   \\",
+    "|    //----\\\\       //----\\\\  |",
+    "|    ||    ||       ||    ||  |",
+    "|    ||  x ||       ||  x ||  |",
+    "|    ||____||_______||____||  |",
+    "|    \\\\____//       \\\\____//  |",
+    " \\___         _____        ___/",
+    "     /__               __\\",
+    "    |   |_____________|   |",
+    "    |   || * *   * * ||   |",
+    "    |   || * *   * * ||   |",
+    "    |___||___________||___|",
+    "     \\\\_|||         |||_//",
+    "       \\\\||         ||//",
+    "         -|_________|-'",
+    "          '---------' ",
+    "",
+    "",
+};
+
+string boss_skill[] = {
+    "   .-----------------------.",
+    "  /                         \\",
+    " /     ____           ____   \\",
+    "|    //----\\\\       //----\\\\  |",
+    "|    ||    ||       ||    ||  |",
+    "|    ||  * ||       || ",
+    "*  ||  |",  // Color change logic can be handled in the display function
+    "|    ||____||_______||____||  |",
+    "|    \\\\____//       \\\\____//  |",
+    " \\___         _____        ___/",
+    "     /__               __\\",
+    "    |   |_____________|   |",
+    "    |   || * * * * * ||   |",
+    "    |   || * * * * * ||   |",
+    "    |___||___________||___|",
+    "     \\\\_|||         |||_//",
+    "       \\\\||         ||//",
+    "         -|_________|-'",
+    "          '---------' ",
+    "",
+    "",
+};
+
+string boss_heal[] = {
+    "   .-----------------------.",
+    "  /                         \\",
+    " /     ____           ____   \\",
+    "|    //----\\\\       //----\\\\  |",
+    "|    ||    ||       ||    ||  |",
+    "|    ||  * ||       || *  ||  |",
+    "|    ||____||_______||____||  |",
+    "|    \\\\____//       \\\\____//  |",
+    " \\___         _____        ___/",
+    "     /__               __\\",
+    "    |   |_____________|   |",
+    "    |   || * * * * * ||   |",
+    "    |   || * * * * * ||   |",
+    "    |___||___________||___|",
+    "     \\\\_|||         |||_//",
+    "       \\\\||         ||//",
+    "         -|_________|-'",
+    "          '---------' ",
+    "",
+    "",
+};
+
+
 
 // Tetromino menggunakan vector
 vector<vector<vector<int>>> tetromino = {
@@ -40,45 +224,45 @@ vector<vector<vector<int>>> tetromino = {
     {{1, 1, 0}, {0, 1, 1}}           // Z
 };
 
-void setColor(int color) {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(hConsole, color);
-}
-
 void playSound(const string &filename) {
     if (!PlaySound(filename.c_str(), NULL, SND_FILENAME | SND_ASYNC)) {
         cerr << "Error playing sound: " << filename << endl;
     }
 }
 
-void setFullScreenMode() {
-    // Handle for the console window
+void playMusic(const string &filename) {
+    if (!PlaySound(filename.c_str(), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP)) {
+        cerr << "Error playing sound: " << filename << endl;
+    }
+}
+
+void stopMusic() {
+    PlaySound(NULL, NULL, 0);  // Stop any sound that is playing
+}
+
+void setConsoleFullScreen() {
+    // Get console handle
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    // Set the console to full screen mode
     HWND consoleWindow = GetConsoleWindow();
-    if (!consoleWindow) {
-        std::cerr << "Error: Unable to get console window handle!" << std::endl;
-        return;
+    if (consoleWindow) {
+        ShowWindow(consoleWindow, SW_MAXIMIZE);
     }
 
-    // Get screen width and height
-    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+    // Adjust the console screen buffer size
+    CONSOLE_SCREEN_BUFFER_INFOEX csbiex = { sizeof(CONSOLE_SCREEN_BUFFER_INFOEX) };
+    GetConsoleScreenBufferInfoEx(hConsole, &csbiex);
 
-    // Resize the console to cover the entire screen
-    MoveWindow(consoleWindow, 0, 0, screenWidth, screenHeight, TRUE);
+    csbiex.dwSize.X = 120;  // Width of buffer
+    csbiex.dwSize.Y = 300;  // Height of buffer
+    csbiex.dwMaximumWindowSize.X = 120;
+    csbiex.dwMaximumWindowSize.Y = 30;
+    SetConsoleScreenBufferInfoEx(hConsole, &csbiex);
 
-    // Set console to full-screen mode
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hOut == INVALID_HANDLE_VALUE) {
-        std::cerr << "Error: Unable to get console output handle!" << std::endl;
-        return;
-    }
-
-    DWORD dwMode = 0;
-    if (GetConsoleDisplayMode(&dwMode)) {
-        if (!(dwMode & CONSOLE_FULLSCREEN_MODE)) {
-            SetConsoleDisplayMode(hOut, CONSOLE_FULLSCREEN_MODE, NULL);
-        }
-    }
+    // Set console screen buffer to fit the window
+    SMALL_RECT rect = { 0, 0, 119, 29 };  // {left, top, right, bottom}
+    SetConsoleWindowInfo(hConsole, TRUE, &rect);
 }
 
 int arenaColors[height][width] = {0};
@@ -149,15 +333,20 @@ void summonTetromino(int arena[height][width], int arenaColors[height][width], i
     }
 }
 
+// notif buat game
+void notification(string &message, const string &newMessage) {
+    message = newMessage;
+}
+
 // Fungsi untuk menggambar arena
-void draw(int arena[height][width], int arenaColors[height][width], vector<vector<int>> &nextTetromino, int currentTetrominoIndex, int nextTetrominoIndex, bool isBossMode) {
+void draw(int arena[height][width], int arenaColors[height][width], vector<vector<int>> &nextTetromino, int currentTetrominoIndex, int nextTetrominoIndex, bool isBossMode, string messages) {
     const int boxHeight = 4;
     const int boxWidth = 4;
     const int horizontalSpacing = 5;
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
-
-    int consoleWidth = 120;
+//    int consoleWidth = 120;
+    int consoleWidth = getConsoleWidth();
     int arenaWidth = width;
     int horizontalPadding = isBossMode ? (consoleWidth - arenaWidth) / 2 : 0;
     const int instructionPadding = 26;
@@ -222,8 +411,9 @@ void draw(int arena[height][width], int arenaColors[height][width], vector<vecto
     }
 
     // Instructions
-    cout << endl;
+
     if (isBossMode == true){
+    cout << messages << endl;
     cout << string(horizontalPadding + instructionPadding, ' ') << "'A' to Move tetromino to the left" << endl;
     cout << string(horizontalPadding + instructionPadding, ' ') << "'D' to Move tetromino to the right" << endl;
     cout << string(horizontalPadding + instructionPadding, ' ') << "'W' to Rotate tetromino" << endl;
@@ -283,7 +473,7 @@ bool canTurnRight(int arena[height][width], int position_x, int position_y, vect
     return true;
 }
 
-void clearLines(int arena[height][width], int &bossHealth, int arenaColors[height][width]) {
+void clearLines(int arena[height][width], int &bossHealth) {
     for (int i = 1; i < height - 1; i++) {
         bool fullLine = true;
         for (int j = 1; j < width - 1; j++) {
@@ -291,6 +481,8 @@ void clearLines(int arena[height][width], int &bossHealth, int arenaColors[heigh
                 fullLine = false;
                 break;
             }
+        }
+        if (fullLine) {
             if(doubleDamage == true) {
                 score += 200;
                 bossHealth -= 200;
@@ -299,7 +491,7 @@ void clearLines(int arena[height][width], int &bossHealth, int arenaColors[heigh
                 score += 100;
                 bossHealth -= 100;
             }
-            destroyLines++;
+            mana++;
 
             for (int j = 1; j < width - 1; j++) {
                 arena[i][j] = 0;
@@ -307,7 +499,6 @@ void clearLines(int arena[height][width], int &bossHealth, int arenaColors[heigh
             for (int k = i; k > 1; k--) {
                 for (int j = 1; j < width - 1; j++) {
                     arena[k][j] = arena[k - 1][j];
-                    arenaColors[k][j] = arenaColors[k - 1][j];
                 }
             }
         }
@@ -635,7 +826,7 @@ void showLeaderboard() {
 
     system("cls");
 
-    playSound("music/leaderboard.wav");
+    playMusic("music/leaderboard.wav");
 
     string horizontal_padding((console_width - menu_width) / 2, ' ');
 
@@ -705,7 +896,127 @@ bool canRandom(int randomTetromino, int arena[height][width], int positionX, int
     }
 }
 
-void runNormalGame() {
+string intro() {
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    int console_width, console_height;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    console_width = csbi.dwSize.X;
+    console_height = csbi.dwSize.Y;
+
+    string names[] = {"Han", "Gilbert", "Reynard"};
+    vector<vector<string>> blocks = {
+        {"#####", "#\u2589\u2589\u2589#", "# \u2589 #", "# \u2589 #", "# \u2589 #", "# \u2589 #", "#####"},
+        {"#####", "#\u2589\u2589\u2589#", "#\u2589  #", "#\u2589\u2589\u2589#", "#\u2589  #", "#\u2589\u2589\u2589#", "#####"},
+        {"#####", "#\u2589\u2589\u2589#", "# \u2589 #", "# \u2589 #", "# \u2589 #", "# \u2589 #", "#####"},
+        {"#####", "#\u2589\u2589\u2589#", "#\u2589 \u2589#", "#\u2589\u2589\u2589#", "#\u2589\u2589 #", "#\u2589 \u2589#", "#####"},
+        {"#####", "# \u2589 # ", "# \u2589 #", "# \u2589 #", "# \u2589 #", "# \u2589 #", "#####"},
+        {"#####", "#\u2589\u2589\u2589#", "#\u2589  #", "#\u2589\u2589\u2589#", "#  \u2589#", "#\u2589\u2589\u2589#", "#####" }
+    };
+
+    vector<string> nameblock = {
+        "############################################################",
+        "#                                                          #",
+        "#        @@@@@@  @@@@@  @@@@@@  @@@@  @@  @@@@@@@          #",
+        "#        @@@@@@  @      @@@@@@  @  @  @@  @@               #",
+        "#          @@    @@@@@    @@    @@@@  @@  @@@@@@@          #",
+        "#          @@    @@@@@    @@    @@    @@  @@@@@@@          #",
+        "#          @@    @        @@    @ @   @@       @@          #",
+        "#          @@    @@@@@    @@    @  @  @@  @@@@@@@          #",
+        "#                                                          #",
+        "#                                                          #",
+        "#                                                          #",
+        "#                                                          #",
+        "#                                                          #",
+        "#                     ENTER YOUR NAME:                     #",
+        "############################################################"
+    };
+
+    const int menu_width = 40;
+    cout << "Press 'ENTER' to skip the intro" << endl;
+    string horizontal_padding((console_width - menu_width) / 2, ' ');
+
+    string playerName = "";
+
+    cout << endl;
+    cout << horizontal_padding << "Group project made by:" << endl;
+    cout << endl;
+
+    for (const string& name : names) {
+        if (_kbhit() && _getch() == 13) { // Check if Enter is pressed
+            goto skip_intro;
+        }
+        cout << horizontal_padding << name << endl;
+        this_thread::sleep_for(chrono::seconds(1)); // 1 second delay
+    }
+
+    // Display block sequences
+    for (const auto& block_set : blocks) {
+        if (_kbhit() && _getch() == 13) { // Check if Enter is pressed
+            goto skip_intro;
+        }
+        system("cls");
+        cout << "Press 'ENTER' to skip the intro" << endl;
+        cout << endl;
+        for (const string& block : block_set) {
+            cout << horizontal_padding << block << endl;
+            this_thread::sleep_for(chrono::milliseconds(500)); // 0.5 second delay
+        }
+    }
+
+skip_intro: // Skip to insert name
+    system("cls");
+
+    while (true) {
+        system("cls");
+        for (size_t i = 0; i < nameblock.size(); i++) {
+            if (i == 13) {
+                string nameLine = "#                 ENTER YOUR NAME: " + playerName + "_                        #";
+                if (nameLine.size() > nameblock[13].size()) {
+                    nameLine = nameLine.substr(0, nameblock[13].size() - 1) + "#"; // Truncate if too long
+                }
+                cout << horizontal_padding << nameLine << endl;
+            } else {
+                cout << horizontal_padding << nameblock[i] << endl;
+            }
+        }
+
+        char ch = _getch();
+        if (ch == 13) { // Enter key
+            break;
+        } else if (ch == 8) { // Backspace
+            if (!playerName.empty()) {
+                playerName.pop_back();
+            }
+        } else if (isprint(ch)) { // Printable characters
+            if (playerName.size() < 20) { // Limit nama biar ga terlalu panjang
+                playerName += ch;
+            }
+        }
+    }
+
+    // Display final box with the entered name
+    system("cls");
+    for (size_t i = 0; i < nameblock.size(); i++) {
+        if (i == 13) {
+            string nameLine = "#                 ENTER YOUR NAME: " + playerName + "_                        #";
+            if (nameLine.size() > nameblock[13].size()) {
+                nameLine = nameLine.substr(0, nameblock[13].size() - 1) + "#";
+            }
+            cout << horizontal_padding << nameLine << endl;
+        } else {
+            cout << horizontal_padding << nameblock[i] << endl;
+        }
+    }
+
+    // Indicate game is starting
+    cout << "\nGame starting..." << endl;
+    return playerName;
+    Sleep(2000);
+}
+
+void runNormalGame(const string& playerName) {
     int dx = 0;
     int tetromino_y = 1;
     int tetromino_x = rand() % 19 + 1;
@@ -717,18 +1028,14 @@ void runNormalGame() {
     bool flag = true;
     int tempY, counter = 0;
     score = 0;
-
+    string bossSkillMessage="";
     system("cls");
 
-    cout << "Enter Your Name : ";
-    cin >> playerName;
-
-    cout << "Have Fun Playing!" << endl;
     Sleep(1500);
 
     system("cls");
 
-    playSound("music/MainTheme.wav");
+    playMusic("music/MainTheme.wav");
 
     while (!gameOver(arena)) {
         bool drop = false;
@@ -794,7 +1101,7 @@ void runNormalGame() {
 
         counter++;
         hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
-        draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex, false);
+        draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex, false, bossSkillMessage);
         clearLines(arena);
         Sleep(100);
         system("cls");
@@ -805,59 +1112,41 @@ void runNormalGame() {
     Sleep(2000);
 }
 
-void fillBottomRow(int arena[height][width], int tetromino_y, int tetromino_x, int randomTetromino) {
-    int i = height - 2;
-
-    for (int j = 1; j < width - 1; j++) {
-        arena[i][j] = 7;
-        arenaColors[tetromino_y + i - 1][tetromino_x + j] = tetrominoColors[randomTetromino];
-
-    }
-}
-
-void activateClearBottomRow(int arena[height][width], int &bossHealth) {
-    // sek blm
-    bossHealth -= 100;
-}
-
-void activatePlayerSkills(char control, int arena[height][width], int &bossHealth, int tetrominoY,int  tetrominoX, int randomTetromino) {
-    if (control == '1' && destroyLines >= 1) {
-        doubleDamage = true;
-
-    } else if (control == '2' && destroyLines >= 2) {
-        fillBottomRow(arena, tetrominoY, tetrominoX, randomTetromino);
-
-    } else if (control == '3' && (destroyLines >= 3 && destroyLines % 3 == 0)) {
-        shieldActive = true;
+void activatePlayerSkills(char control, int arena[height][width], int &bossHealth, string &playerSkillMessage) {
+    if (control == '1' && mana >= 1) {
+        if(cdSkill1 <= 0) {
+            doubleDamage = true;
+            cdSkill1 = 60;
+            mana--;
+            notification(playerSkillMessage, "Player used Skill 1: Double Damage!");
+        }
+    } else if (control == '2' && mana >= 2) {
         if(cdUltimate <= 0) {
+            shieldActive = true;
             cdUltimate = 120;
+            mana -= 2;
+            notification(playerSkillMessage, "Player used Skill 2: Shield Activated!");
         }
     }
 }
 
-void displaySkillStatus(bool skill_1_active, bool skill_2_active, bool skill_3_active) {
+void displaySkillStatus(bool skill_1_active, bool skill_2_active) {
     const int skillBoxWidth = 73;
 
     // Cek skill 1
-    if (skill_1_active) {
+    if (skill_1_active && cdSkill1 == 0) {
         cout << string(skillBoxWidth, ' ') << "Skill 1 (Double Damage): Active" << endl;
+    } else if (cdSkill1 > 0) {
+        cout << string(skillBoxWidth, ' ') << "Skill 1 (Double Damage): Inactive - Coldown : " << cdSkill1 << endl;
     } else {
         cout << string(skillBoxWidth, ' ') << "Skill 1 (Double Damage): Inactive" << endl;
     }
 
     // Cek skill 2
-    if (skill_2_active) {
-        cout << string(skillBoxWidth, ' ') << "Skill 2 (Clear Bottom Row): Active" << endl;
+    if (skill_2_active && cdUltimate == 0) {
+        cout << string(skillBoxWidth, ' ') << "Skill 2 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
     } else {
-        cout << string(skillBoxWidth, ' ') << "Skill 2 (Clear Bottom Row): Inactive" << endl;
-    }
-
-    // Cek skill 3
-    if (skill_3_active) {
-//        cout << "Skill 3 (Shield/Defense): Active" << endl;
-        cout << string(skillBoxWidth, ' ') << "Skill 3 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
-    } else {
-        cout << string(skillBoxWidth, ' ') << "Skill 3 (Shield/Defense): Inactive" << endl;
+        cout << string(skillBoxWidth, ' ') << "Skill 2 (Shield/Defense): Inactive" << endl;
     }
 }
 
@@ -876,7 +1165,8 @@ void runGame(int bossHealth, int interval) {
     int tempY, randomSkill, counter = 1; // counter buat ngitung detik atau ms
     // jadi interval boss nyerang itu nanti rumus nya counter % interval
     score = 0;
-
+    string bossSkillMessage = "";
+    string playerSkillMessage = "";
 
     system("cls");
 
@@ -894,6 +1184,7 @@ void runGame(int bossHealth, int interval) {
             dx = 0;
             if (kbhit()) {
                 char control = getch();
+                activatePlayerSkills(control, arena, bossHealth, playerSkillMessage);
 
                 if (muteMove) {
 
@@ -916,10 +1207,7 @@ void runGame(int bossHealth, int interval) {
                         drop = true;
                         flag = false;
                     } else if(control == '1' || control == '2' || control == '3') {
-                        activatePlayerSkills(control, arena, bossHealth, tetromino_y, tetromino_x, randomTetromino);
-                        hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
-                        draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex, true);
-                        clearLines(arena, bossHealth, arenaColors);
+                        activatePlayerSkills(control, arena, bossHealth, bossSkillMessage);
                     }
 
                 } else {
@@ -944,20 +1232,24 @@ void runGame(int bossHealth, int interval) {
                 } while((randomSkill == 3 && bossHealth + 50 > limitHealth) || (randomSkill == 1 && !canRandom(changeTetromino, arena, tetromino_x, tetromino_y)));
 
                 if (shieldActive) {
-                    cout << "Boss skill blocked by Shield!" << endl;
+//                    cout << "Boss skill blocked by Shield!" << endl;
+                      bossSkillMessage = "Boss skill blocked by Shield!";
                 } else {
                     if (randomSkill == 1) { // Skill1: ngubah bentuk tetromino
                         currentTetromino = tetromino[changeTetromino];
+                        bossSkillMessage = "Boss used a Skill: Change Tetromino!";
                     } else if (randomSkill == 2) { // Skill2: Langsung jatuhin Tetromino
                         drop = true;
                         flag = false;
+                        bossSkillMessage = "Boss used a Skill: Force Drop!";
                     } else if (randomSkill == 3) { // Skill3: Nambah darah boss
                         bossHealth += 50;
+                        bossSkillMessage = "Boss used a Skill: Healing!";
                     } else { // Skill4: blokir player move
                         muteMove = false;
+                        bossSkillMessage = "Boss used a Skill: Movement Block!";
                     }
                 }
-
             }
 
         } else {
@@ -997,8 +1289,8 @@ void runGame(int bossHealth, int interval) {
         cout << "destroy : " << destroyLines << endl;
         cout << "Boss Health: " << bossHealth << endl;
         hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
-        draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex, true);
-        clearLines(arena, bossHealth, arenaColors);
+        draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex, true, bossSkillMessage + "\n" + playerSkillMessage);
+        clearLines(arena, bossHealth);
 
         if(shieldActive) {
             if(cdUltimate > 0) {
@@ -1009,30 +1301,24 @@ void runGame(int bossHealth, int interval) {
             }
         }
 
-        // Update status skill menggunakan if-if
-        if (destroyLines >= 1) {
+        //kriteria skill
+        if (mana >= 1) {
             skill_1_active = true;
         } else {
             skill_1_active = false;
         }
 
-        if (destroyLines >= 2) {
-            skill_2_active = true;
-        } else {
-            skill_2_active = false;
-        }
-
-         if (destroyLines >= 3 && destroyLines % 3 == 0) {
+        if (mana >= 2) {
             if (cdUltimate > 0) {
-                skill_3_active = true; // Still active while cooldown runs
+                skill_2_active = true; // Still active while cooldown runs
             } else {
-                skill_3_active = false; // Inactive once cooldown finishes
+                skill_2_active = false; // Inactive once cooldown finishes
             }
         } else {
-            skill_3_active = false; // Inactive if destroy < 3
+            skill_2_active = false; // Inactive if mana < 2
         }
 
-        displaySkillStatus(skill_1_active, skill_2_active, skill_3_active);
+        displaySkillStatus(skill_1_active, skill_2_active);
         Sleep(100);
         system("cls");
     }
@@ -1048,7 +1334,7 @@ void runGame(int bossHealth, int interval) {
 int main() {
     srand(time(0));
     loadScores();
-    setFullScreenMode();
+    setConsoleFullScreen();
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     int console_width = csbi.dwSize.X;
@@ -1060,8 +1346,8 @@ int main() {
     int start_line = 5; // Starting line for the submenu
 
     while (true){
+    stopMusic();
     int selection_menu = main_menu(console_width, menu_width);
-
     int easy = 3000, intervalEasy = 60; // easy, medium,
     int medium = 4500, intervalMed = 45;
     int hard = 6000, intervalHard = 5;
@@ -1070,7 +1356,10 @@ int main() {
         int selection_submenu = play_submenu(console_width, menu_width, difficulty, start_line);
 
         if (selection_submenu == 0){
-            runNormalGame();
+            system("cls");
+            string playerName = intro();
+            Sleep(2500);
+            runNormalGame(playerName);
         } else if (selection_submenu == 1){
             int selection_difficulty = difficulty_menu(console_width, menu_width, start_line);
 
@@ -1087,8 +1376,11 @@ int main() {
     } else if (selection_menu == 1){
         showLeaderboard();
     } else if (selection_menu == 2){
+        playSound("sfx/exit.wav");
+        this_thread::sleep_for(chrono::milliseconds(1500));
         break;
+
     }
-    }
+}
     return 0;
 }
