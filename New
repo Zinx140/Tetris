@@ -203,34 +203,6 @@ string boss_heal[] = {
     "",
 };
 
-void display_boss_random() {
-    srand((unsigned int)time(NULL));
-
-    while (true) {
-        int randomAction = rand() % 4;
-        int randomMovement = rand() % 2;
-        system("cls");
-        if (randomMovement == 1){
-            cout << endl;
-        }
-        switch (randomAction) {
-            case 0:
-                boss_look_left();
-                break;
-            case 1:
-                boss_look_right();
-                break;
-            case 2:
-                boss_mouth();
-                break;
-            case 3:
-                boss_default();
-                break;
-        }
-        this_thread::sleep_for(chrono::seconds(3));
-    }
-}
-
 // Tetromino menggunakan vector
 vector<vector<vector<int>>> tetromino = {
     {{1, 1, 1, 1}},                  // I
@@ -372,6 +344,7 @@ void draw(int arena[height][width], int arenaColors[height][width], vector<vecto
     int arenaWidth = width;
     int horizontalPadding = isBossMode ? (consoleWidth - arenaWidth) / 2 : 0;
     const int instructionPadding = 26;
+
 
     for (int i = 0; i < height; i++) {
         // Add horizontal padding for boss mode
@@ -1398,7 +1371,10 @@ int main() {
     } else if (selection_menu == 1){
         showLeaderboard();
     } else if (selection_menu == 2){
+        playSound("sfx/exit.wav");
+        this_thread::sleep_for(chrono::milliseconds(1500));
         break;
+
     }
 }
     return 0;
