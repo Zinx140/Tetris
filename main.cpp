@@ -18,6 +18,7 @@ using namespace std;
 bool isBossMode = false;
 const int width = 25;
 const int height = 20;
+int arenaColors[height][width] = {0};
 int score = 0;
 string playerName;
 vector<string> playerNames;
@@ -182,26 +183,26 @@ string boss_skill[] = {
 };
 
 string boss_heal[] = {
-    "   .-----------------------.",
-    "  /                         \\",
-    " /     ____           ____   \\",
-    "|    //----\\\\       //----\\\\  |",
-    "|    ||    ||       ||    ||  |",
-    "|    ||  * ||       || *  ||  |",
-    "|    ||____||_______||____||  |",
-    "|    \\\\____//       \\\\____//  |",
-    " \\___         _____        ___/",
-    "     /__               __\\",
-    "    |   |_____________|   |",
-    "    |   || * * * * * ||   |",
-    "    |   || * * * * * ||   |",
-    "    |___||___________||___|",
-    "     \\\\_|||         |||_//",
-    "       \\\\||         ||//",
-    "         -|_________|-'",
-    "          '---------' ",
-    "",
-    "",
+    "   .-----------------------.      ",
+    "  /                         \\    ",
+    " /     ____           ____   \\   ",
+    "|    //----\\\\       //----\\\\| ",
+    "|    ||    ||       ||    ||  |   ",
+    "|    ||  * ||       || *  ||  |   ",
+    "|    ||____||_______||____||  |   ",
+    "|    \\\\____//       \\\\____//| ",
+    " \\___         _____        ___/  ",
+    "     /__               __\\       ",
+    "    |   |_____________|   |       ",
+    "    |   || * * * * * ||   |       ",
+    "    |   || * * * * * ||   |       ",
+    "    |___||___________||___|       ",
+    "     \\\\_|||         |||_//      ",
+    "       \\\\||         ||//        ",
+    "         -|_________|-'           ",
+    "          '---------'             ",
+    "                                  ",
+    "                                  ",
 };
 
 // Tetromino menggunakan vector
@@ -230,38 +231,6 @@ void playMusic(const string &filename) {
 void stopMusic() {
     PlaySound(NULL, NULL, 0);  // Stop any sound that is playing
 }
-
-void setFullScreenMode() {
-    // Handle for the console window
-    HWND consoleWindow = GetConsoleWindow();
-    if (!consoleWindow) {
-        std::cerr << "Error: Unable to get console window handle!" << std::endl;
-        return;
-    }
-
-    // Get screen width and height
-    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-
-    // Resize the console to cover the entire screen
-    MoveWindow(consoleWindow, 0, 0, screenWidth, screenHeight, TRUE);
-
-    // Set console to full-screen mode
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hOut == INVALID_HANDLE_VALUE) {
-        std::cerr << "Error: Unable to get console output handle!" << std::endl;
-        return;
-    }
-
-    DWORD dwMode = 0;
-    if (GetConsoleDisplayMode(&dwMode)) {
-        if (!(dwMode & CONSOLE_FULLSCREEN_MODE)) {
-            SetConsoleDisplayMode(hOut, CONSOLE_FULLSCREEN_MODE, NULL);
-        }
-    }
-}
-
-int arenaColors[height][width] = {0};
 
 // set warnanya ganti aja angkanya kalo mau ganti warna (1-15)
 int tetrominoColors[7] = {
@@ -334,6 +303,29 @@ void notification(string &message, const string &newMessage) {
     message = newMessage;
 }
 
+void maximizeConsole() {
+    HWND consoleWindow = GetConsoleWindow(); // Get the console window handle
+    if (consoleWindow == NULL) {
+        std::cerr << "Failed to retrieve the console window handle." << std::endl;
+        return;
+    }
+
+    // Maximize the console window
+    ShowWindow(consoleWindow, SW_MAXIMIZE);
+
+    // Resize the buffer size to avoid scrolling and to fill more of the screen
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO bufferInfo;
+    GetConsoleScreenBufferInfo(hConsole, &bufferInfo);
+
+    COORD newSize;
+    newSize.X = bufferInfo.dwMaximumWindowSize.X; // Maximum width
+    newSize.Y = 300;                             // Set height to a large value to avoid scrolling
+    SetConsoleScreenBufferSize(hConsole, newSize);
+
+    std::cout << "Console maximized to fill screen." << std::endl;
+}
+
 // Fungsi untuk menggambar arena
 void draw(int arena[height][width], int arenaColors[height][width], vector<vector<int>> &nextTetromino, int currentTetrominoIndex, int nextTetrominoIndex, bool isBossMode, string messages) {
     const int boxHeight = 4;
@@ -350,8 +342,10 @@ void draw(int arena[height][width], int arenaColors[height][width], vector<vecto
     for (int i = 0; i < height; i++) {
         // Add horizontal padding for boss mode
         if (isBossMode == true) {
-            cout << string(horizontalPadding, ' ');
+            cout << setw(60) << boss_heal[i];
         }
+        
+        cout << setw(width);
 
         for (int j = 0; j < width; j++) {
             if (arena[i][j] == 1 || arena[i][j] == 7) {
@@ -535,7 +529,6 @@ void clearLines(int arena[height][width], int arenaColors[height][width]) {
     }
 }
 
-
 bool gameOver(int arena[height][width]) {
     for (int j = 1; j < width - 1; j++) {
         if (arena[1][j] == 7) {
@@ -604,7 +597,6 @@ void draw_menu_selection(const int console_width, const int menu_width, const st
     moveCursorTo(0, start_line + menu_size + 2);
     cout << horizontal_padding << "############################################################" << endl;
 }
-
 
 int difficulty_menu(const int console_width, const int menu_width, int start_line) {
     int control_x = 0;
@@ -771,7 +763,6 @@ void loadScores() {
     }
     infile.close();
 }
-
 
 void saveScores() {
     ofstream outfile("leaderboard.txt");
@@ -1369,7 +1360,7 @@ void runGame(int bossHealth, int interval) {
 int main() {
     srand(time(0));
     loadScores();
-    setFullScreenMode();
+    maximizeConsole();
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     int console_width = csbi.dwSize.X;
