@@ -24,6 +24,7 @@ string playerName;
 vector<string> playerNames;
 vector<int> scores;
 int mana = 60;
+string arenaFace[height];
 
 bool skill_1_active = false;
 bool skill_2_active = false;
@@ -110,6 +111,7 @@ string boss_look_right[] = {
     "               '---------'            ",
     "                                      ",
     "                                      ",
+};
 
 string boss_look_left[] = {
     "        .-----------------------.     ",
@@ -204,33 +206,39 @@ string boss_heal[] = {
     "                                      ",
 };
 
-void display_boss_random() {
-    srand((unsigned int)time(NULL));
-
-    while (true) {
-        int randomAction = rand() % 4;
-        int randomMovement = rand() % 2;
-        system("cls");
-        if (randomMovement == 1){
-            cout << endl;
-        }
-        switch (randomAction) {
-            case 0:
-                boss_look_left();
-                break;
-            case 1:
-                boss_look_right();
-                break;
-            case 2:
-                boss_mouth();
-                break;
-            case 3:
-                boss_default();
-                break;
-        }
-        this_thread::sleep_for(chrono::seconds(3));
+void fillFace(string arenaFace[], string bossFace[]) {
+    for (int i = 0; i < height; i++) {
+        arenaFace[i] = bossFace[i];
     }
 }
+
+void display_boss_random(string arenaFace[]) {
+//    srand((unsigned int)time(NULL));
+//
+//        int randomAction = rand() % 4;
+//        int randomMovement = rand() % 2;
+//        system("cls");
+//        if (randomMovement == 1){
+//            cout << endl;
+//        }
+//        switch (randomAction) {
+//            case 0:
+//                fillFace(arenaFace, boss_look_left);
+//                break;
+//            case 1:
+//                fillFace(arenaFace, boss_look_right);
+//                break;
+//            case 2:
+//                fillFace(arenaFace, boss_mouth);
+//                break;
+//            case 3:
+//                fillFace(arenaFace, boss_default);
+//                break;
+//        }
+//        this_thread::sleep_for(chrono::seconds(3));
+        fillFace(arenaFace, boss_skill);
+}
+
 
 // Tetromino menggunakan vector
 vector<vector<vector<int>>> tetromino = {
@@ -364,12 +372,12 @@ void draw(int arena[height][width], int arenaColors[height][width], vector<vecto
     int arenaWidth = width;
     int horizontalPadding = isBossMode ? (consoleWidth - arenaWidth) / 2 : 0;
     const int instructionPadding = 26;
-
+    display_boss_random(arenaFace);
 
     for (int i = 0; i < height; i++) {
         // Add horizontal padding for boss mode
         if (isBossMode == true) {
-            cout << setw(60) << boss_heal[i];
+            cout << setw(60) << arenaFace[i];
         }
 
         cout << setw(width);
@@ -1158,31 +1166,36 @@ void activatePlayerSkills(char control, int arena[height][width], int &bossHealt
     }
 }
 
-void displaySkillStatus(bool skill_1_active, bool skill_2_active, bool skill_3_active) {
+void displaySkillStatus(bool skill_1_active, bool skill_2_active, bool skill_3_active, bool rage) {
 
-    // Cek skill 1
-    if (skill_1_active && cdSkill1 == 0) {
-        cout << "Skill 1 (Double Damage): Active" << endl;
-    } else if (cdSkill1 > 0) {
-        cout << "Skill 1 (Double Damage): Inactive - Coldown : " << cdSkill1 << endl;
-    } else {
-        cout << "Skill 1 (Double Damage): Inactive" << endl;
-    }
+    if (!rage) {
 
-    //Cek Skill 2
-    if (skill_2_active) {
-        cout << "Skill 2 (Destroy Lower Lines): Active" << endl;
-    } else {
-        cout << "Skill 2 (Destroy Lower Lines): Inactive - Coldown : " << cdSkill2 << endl;
-    }
+        // Cek skill 1
+        if (skill_1_active && cdSkill1 == 0) {
+            cout << "Skill 1 (Double Damage): Active" << endl;
+        } else if (cdSkill1 > 0) {
+            cout << "Skill 1 (Double Damage): Inactive - Coldown : " << cdSkill1 << endl;
+        } else {
+            cout << "Skill 1 (Double Damage): Inactive" << endl;
+        }
 
-    // Cek skill 3
-    if (skill_3_active && cdUltimate == 0) {
-        cout << "Skill 3 (Shield/Defense): Active" << endl;
-    } else if (cdUltimate > 0) {
-        cout << "Skill 3 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
+        //Cek Skill 2
+        if (skill_2_active) {
+            cout << "Skill 2 (Destroy Lower Lines): Active" << endl;
+        } else {
+            cout << "Skill 2 (Destroy Lower Lines): Inactive - Coldown : " << cdSkill2 << endl;
+        }
+
+        // Cek skill 3
+        if (skill_3_active && cdUltimate == 0) {
+            cout << "Skill 3 (Shield/Defense): Active" << endl;
+        } else if (cdUltimate > 0) {
+            cout << "Skill 3 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
+        } else {
+            cout << "Skill 3 (Shield/Defense): Inactive" << endl;
+        }
     } else {
-        cout << "Skill 3 (Shield/Defense): Inactive" << endl;
+        cout << "The boss is rage You can't use your skills" << endl;
     }
 }
 
@@ -1195,7 +1208,7 @@ void runGame(int bossHealth, int interval) {
     int nextTetrominoIndex = rand() % 7; // Index untuk tetronimo berikutnya
     vector<vector<int>> nextTetromino = tetromino[nextTetrominoIndex]; // vector next tetronimo
     int arena[height][width] = {0};
-    bool flag = true, muteMove = true;
+    bool flag = true, muteMove = true, rage = false;
     int limitHealth = bossHealth;
     string skillName;
     int tempY, randomSkill, counter = 1; // counter buat ngitung detik atau ms
@@ -1242,7 +1255,9 @@ void runGame(int bossHealth, int interval) {
                         drop = true;
                         flag = false;
                     } else if(control == '1' || control == '2' || control == '3') {
-                        activatePlayerSkills(control, arena, bossHealth, tetromino_x, tetromino_y, randomTetromino);
+                        if (!rage) {
+                            activatePlayerSkills(control, arena, bossHealth, tetromino_x, tetromino_y, randomTetromino);
+                        }
                     }
 
                 } else {
@@ -1348,6 +1363,10 @@ void runGame(int bossHealth, int interval) {
             }
         }
 
+        if (bossHealth <= 300) {
+            rage = true;
+        }
+
         //kriteria skill
         if (mana >= 1) {
             skill_1_active = true;
@@ -1371,7 +1390,7 @@ void runGame(int bossHealth, int interval) {
             skill_3_active = false; // Inactive if mana < 5
         }
 
-        displaySkillStatus(skill_1_active, skill_2_active, skill_3_active);
+        displaySkillStatus(skill_1_active, skill_2_active, skill_3_active, rage);
         Sleep(100);
         system("cls");
     }
