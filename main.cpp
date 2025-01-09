@@ -1083,7 +1083,9 @@ void intro_boss() {
     string line_3[9] = {"Meet TETROFENDER-X,", "once a guardian of Tetriminos,", "now", "a deranged machine", "obsessed with eliminating chaos.", "Its arsenal of tools,", "rotating walls,", "and super-powered blocks are ready to crush you."};
     string line_4[5] = {"MY", "BLOCKS", "WILL", "DESTROY", "YOU!"};
     string line_5[4] = {"Can the Player", "defeat the mighty Tetrofender-X", "and", "restore order to the Tetris world?"};
+
     bool skip = false;  // Flag to detect if Enter is pressed
+
     // print a line with delay or all at once if Enter is pressed
     auto printLine = [&](const string arr[], int size, int delay_ms) {
         for (int i = 0; i < size; i++) {
