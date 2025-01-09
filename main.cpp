@@ -24,12 +24,18 @@ string playerName;
 vector<string> playerNames;
 vector<int> scores;
 int mana = 60;
+string arenaFace[height];
 
 bool skill_1_active = false;
 bool skill_2_active = false;
 bool skill_3_active = false;
 bool doubleDamage = false;
 bool shieldActive = false;
+
+bool isDamaged = false;
+bool bossDamaged = false;
+bool bossHealing = false;
+bool bossUsingSkill = false;
 
 int cdUltimate = 0;
 int cdSkill2 = 0;
@@ -44,166 +50,220 @@ void setColor(int color) {
 }
 
 string boss_default[] = {
-    "   .-----------------------.",
-    "  /                         \\",
-    " /     ____           ____   \\",
-    "|    //----\\\\       //----\\\\  |",
-    "|    ||    ||       ||    ||  |",
-    "|    ||  * ||       || *  ||  |",
-    "|    ||____||_______||____||  |",
-    "|    \\\\____//       \\\\____//  |",
-    " \\___         _____        ___/",
-    "     /__               __\\",
-    "    |   |_____________|   |",
-    "    |   || * * * * * ||   |",
-    "    |   || * * * * * ||   |",
-    "    |___||___________||___|",
-    "     \\\\_|||         |||_//",
-    "       \\\\||         ||//",
-    "         -|_________|-'",
-    "          '---------' ",
-    "",
-    "",
+    "        .-----------------------.     ",
+    "      /                         \\    ",
+    "     /     ____           ____   \\   ",
+    " |    //----\\\\       //----\\\\  |  ",
+    "     |    ||    ||       ||    ||  |  ",
+    "     |    ||  * ||       || *  ||  |  ",
+    "     |    ||____||_______||____||  |  ",
+    " |    \\\\____//       \\\\____//  |  ",
+    "     \\___         _____        ___/  ",
+    "         /__               __//       ",
+    "        |   |_____________|   |       ",
+    "        |   || * * * * * ||   |       ",
+    "        |   || * * * * * ||   |       ",
+    "        |___||___________||___|       ",
+    "         \\\\_|||      |||_//         ",
+    "           \\\\||      |||//          ",
+    "             '-|_________|-'          ",
+    "               '---------'            ",
+    "                                      ",
+    "                                      ",
 };
 
 string boss_mouth[] = {
-    "   .-----------------------.",
-    "  /                         \\",
-    " /     ____           ____   \\",
-    "|    //----\\\\       //----\\\\  |",
-    "|    ||    ||       ||    ||  |",
-    "|    ||  * ||       || *  ||  |",
-    "|    ||____||_______||____||  |",
-    "|    \\\\____//       \\\\____//  |",
-    " \\___         _____        ___/",
-    "     /__               __\\",
-    "    |   |_____________|   |",
-    "    |   || * * * * * ||   |",
-    "    |   ||           ||   |",
-    "    |   ||           ||   |",
-    "    |   || * * * * * ||   |",
-    "    |___||___________||___|",
-    "     \\\\_|||         |||_//",
-    "       \\\\||         ||//",
-    "         -|_________|-'",
-    "          '---------' "
+    "        .-----------------------.     ",
+    "      /                         \\    ",
+    "     /     ____           ____   \\   ",
+    " |    //----\\\\       //----\\\\  |  ",
+    "     |    ||    ||       ||    ||  |  ",
+    "     |    ||  * ||       || *  ||  |  ",
+    "     |    ||____||_______||____||  |  ",
+    " |    \\\\____//       \\\\____//  |  ",
+    "     \\___         _____        ___/  ",
+    "         /__               __//       ",
+    "        |   |_____________|   |       ",
+    "        |   || * * * * * ||   |       ",
+    "        |   ||           ||   |       ",
+    "        |   ||           ||   |       ",
+    "        |   || * * * * * ||   |       ",
+    "        |___||___________||___|       ",
+    "         \\\\_|||      |||_//         ",
+    "           \\\\||      |||//          ",
+    "             '-|_________|-'          ",
+    "               '---------'            ",
 };
 
 string boss_look_right[] = {
-    "   .-----------------------.",
-    "  /                         \\",
-    " /     ____           ____   \\",
-    "|    //----\\\\       //----\\\\  |",
-    "|    ||    ||       ||    ||  |",
-    "|    ||  > ||       ||  > ||  |",
-    "|    ||____||_______||____||  |",
-    "|    \\\\____//       \\\\____//  |",
-    " \\___         _____        ___/",
-    "     /__               __\\",
-    "    |   |_____________|   |",
-    "    |   || * * * * * ||   |",
-    "    |   || * * * * * ||   |",
-    "    |___||___________||___|",
-    "     \\\\_|||         |||_//",
-    "       \\\\||         ||//",
-    "         -|_________|-'",
-    "          '---------' ",
-    "",
-    "",
+    "        .-----------------------.     ",
+    "      /                         \\    ",
+    "     /     ____           ____   \\   ",
+    " |    //----\\\\       //----\\\\  |  ",
+    "     |    ||    ||       ||    ||  |  ",
+    "     |    ||  > ||       ||  > ||  |  ",
+    "     |    ||____||_______||____||  |  ",
+    " |    \\\\____//       \\\\____//  |  ",
+    "     \\___         _____        ___/  ",
+    "         /__               __//       ",
+    "        |   |_____________|   |       ",
+    "        |   || * * * * * ||   |       ",
+    "        |   || * * * * * ||   |       ",
+    "        |___||___________||___|       ",
+    "         \\\\_|||      |||_//         ",
+    "           \\\\||      |||//          ",
+    "             '-|_________|-'          ",
+    "               '---------'            ",
+    "                                      ",
+    "                                      ",
 };
 
 string boss_look_left[] = {
-    "   .-----------------------.",
-    "  /                         \\",
-    " /     ____           ____   \\",
-    "|    //----\\\\       //----\\\\  |",
-    "|    ||    ||       ||    ||  |",
-    "|    || <  ||       || <  ||  |",
-    "|    ||____||_______||____||  |",
-    "|    \\\\____//       \\\\____//  |",
-    " \\___         _____        ___/",
-    "     /__               __\\",
-    "    |   |_____________|   |",
-    "    |   || * * * * * ||   |",
-    "    |   || * * * * * ||   |",
-    "    |___||___________||___|",
-    "     \\\\_|||         |||_//",
-    "       \\\\||         ||//",
-    "         -|_________|-'",
-    "          '---------' ",
-    "",
-    "",
+    "        .-----------------------.     ",
+    "      /                         \\    ",
+    "     /     ____           ____   \\   ",
+    " |    //----\\\\       //----\\\\  |  ",
+    "     |    ||    ||       ||    ||  |  ",
+    "     |    || <  ||       || <  ||  |  ",
+    "     |    ||____||_______||____||  |  ",
+    " |    \\\\____//       \\\\____//  |  ",
+    "     \\___         _____        ___/  ",
+    "         /__               __//       ",
+    "        |   |_____________|   |       ",
+    "        |   || * * * * * ||   |       ",
+    "        |   || * * * * * ||   |       ",
+    "        |___||___________||___|       ",
+    "         \\\\_|||      |||_//         ",
+    "           \\\\||      |||//          ",
+    "             '-|_________|-'          ",
+    "               '---------'            ",
+    "                                      ",
+    "                                      ",
 };
 
 string boss_damaged[] = {
-    "   .-----------------------.",
-    "  /                         \\",
-    " /     ____           ____   \\",
-    "|    //----\\\\       //----\\\\  |",
-    "|    ||    ||       ||    ||  |",
-    "|    ||  x ||       ||  x ||  |",
-    "|    ||____||_______||____||  |",
-    "|    \\\\____//       \\\\____//  |",
-    " \\___         _____        ___/",
-    "     /__               __\\",
-    "    |   |_____________|   |",
-    "    |   || * *   * * ||   |",
-    "    |   || * *   * * ||   |",
-    "    |___||___________||___|",
-    "     \\\\_|||         |||_//",
-    "       \\\\||         ||//",
-    "         -|_________|-'",
-    "          '---------' ",
-    "",
-    "",
+    "        .-----------------------.     ",
+    "      /                         \\    ",
+    "     /     ____           ____   \\   ",
+    " |    //----\\\\       //----\\\\  |  ",
+    "     |    ||    ||       ||    ||  |  ",
+    "     |    ||  x ||       || x  ||  |  ",
+    "     |    ||____||_______||____||  |  ",
+    " |    \\\\____//       \\\\____//  |  ",
+    "     \\___         _____        ___/  ",
+    "         /__               __//       ",
+    "        |   |_____________|   |       ",
+    "        |   || * * *   * ||   |       ",
+    "        |   || *   * * * ||   |       ",
+    "        |___||___________||___|       ",
+    "         \\\\_|||      |||_//         ",
+    "           \\\\||      |||//          ",
+    "             '-|_________|-'          ",
+    "               '---------'            ",
+    "                                      ",
+    "                                      ",
 };
 
 string boss_skill[] = {
-    "   .-----------------------.",
-    "  /                         \\",
-    " /     ____           ____   \\",
-    "|    //----\\\\       //----\\\\  |",
-    "|    ||    ||       ||    ||  |",
-    "|    ||  * ||       || ",
-    "*  ||  |",  // Color change logic can be handled in the display function
-    "|    ||____||_______||____||  |",
-    "|    \\\\____//       \\\\____//  |",
-    " \\___         _____        ___/",
-    "     /__               __\\",
-    "    |   |_____________|   |",
-    "    |   || * * * * * ||   |",
-    "    |   || * * * * * ||   |",
-    "    |___||___________||___|",
-    "     \\\\_|||         |||_//",
-    "       \\\\||         ||//",
-    "         -|_________|-'",
-    "          '---------' ",
-    "",
-    "",
+    "        .-----------------------.     ",
+    "      /                         \\    ",
+    "     /     ____           ____   \\   ",
+    " |    //----\\\\       //----\\\\  |  ",
+    "     |    ||    ||       ||    ||  |  ",
+    "     |    ||  * ||       || *  ||  |  ",
+    "     |    ||____||_______||____||  |  ",
+    " |    \\\\____//       \\\\____//  |  ",
+    "     \\___         _____        ___/  ",
+    "         /__               __//       ",
+    "        |   |_____________|   |       ",
+    "        |   || * * * * * ||   |       ",
+    "        |   || * * * * * ||   |       ",
+    "        |___||___________||___|       ",
+    "         \\\\_|||      |||_//         ",
+    "           \\\\||      |||//          ",
+    "             '-|_________|-'          ",
+    "               '---------'            ",
+    "                                      ",
+    "                                      ",
 };
 
 string boss_heal[] = {
-    "   .-----------------------.      ",
-    "  /                         \\    ",
-    " /     ____           ____   \\   ",
-    "|    //----\\\\       //----\\\\| ",
-    "|    ||    ||       ||    ||  |   ",
-    "|    ||  * ||       || *  ||  |   ",
-    "|    ||____||_______||____||  |   ",
-    "|    \\\\____//       \\\\____//| ",
-    " \\___         _____        ___/  ",
-    "     /__               __\\       ",
-    "    |   |_____________|   |       ",
-    "    |   || * * * * * ||   |       ",
-    "    |   || * * * * * ||   |       ",
-    "    |___||___________||___|       ",
-    "     \\\\_|||         |||_//      ",
-    "       \\\\||         ||//        ",
-    "         -|_________|-'           ",
-    "          '---------'             ",
-    "                                  ",
-    "                                  ",
+    "        .-----------------------.     ",
+    "      /                         \\    ",
+    "     /     ____           ____   \\   ",
+    " |    //----\\\\       //----\\\\  |  ",
+    "     |    ||    ||       ||    ||  |  ",
+    "     |    ||  * ||       || *  ||  |  ",
+    "     |    ||____||_______||____||  |  ",
+    " |    \\\\____//       \\\\____//  |  ",
+    "     \\___         _____        ___/  ",
+    "         /__               __//       ",
+    "        |   |_____________|   |       ",
+    "        |   || * * * * * ||   |       ",
+    "        |   || * * * * * ||   |       ",
+    "        |___||___________||___|       ",
+    "         \\\\_|||      |||_//         ",
+    "           \\\\||      |||//          ",
+    "             '-|_________|-'          ",
+    "               '---------'            ",
+    "                                      ",
+    "                                      ",
 };
+
+void fillFace(string arenaFace[], string bossFace[]) {
+    for (int i = 0; i < height; i++) {
+        arenaFace[i] = bossFace[i];
+    }
+}
+
+void display_boss_random(string arenaFace[], bool bossDamaged, bool bossHealing, bool bossUsingSkill) {
+        static auto lastUpdateTime = chrono::steady_clock::now();
+        auto currentTime = chrono::steady_clock::now();
+        auto elapsed = chrono::duration_cast<chrono::seconds>(currentTime - lastUpdateTime).count();
+        int randomMovement = rand() % 2;
+        system("cls");
+
+        if (bossDamaged){
+            fillFace(arenaFace, boss_damaged);
+            bossDamaged = false;
+        }
+
+        if (bossHealing) {
+        setColor(10); // Set color to green
+        fillFace (arenaFace, boss_heal);
+        setColor(7); // Reset color
+        bossHealing = false;
+        }
+
+        if (bossUsingSkill) {
+        setColor(12); // Set text color to red
+        fillFace (arenaFace, boss_skill);
+        setColor(7); // Reset color
+    }
+
+        if (elapsed >= 4){
+            if (randomMovement == 1){
+            cout << endl;
+            }
+            int randomAction = rand() % 4;
+            switch (randomAction) {
+            case 0:
+                fillFace(arenaFace, boss_look_left);
+                break;
+            case 1:
+                fillFace(arenaFace, boss_look_right);
+                break;
+            case 2:
+                fillFace(arenaFace, boss_mouth);
+                break;
+            case 3:
+                fillFace(arenaFace, boss_default);
+                break;
+        }
+        lastUpdateTime = currentTime; // Reset the timer
+    }
+}
+
 
 // Tetromino menggunakan vector
 vector<vector<vector<int>>> tetromino = {
@@ -337,15 +397,18 @@ void draw(int arena[height][width], int arenaColors[height][width], vector<vecto
     int arenaWidth = width;
     int horizontalPadding = isBossMode ? (consoleWidth - arenaWidth) / 2 : 0;
     const int instructionPadding = 26;
+    display_boss_random(arenaFace, isDamaged, bossHealing, bossUsingSkill);
 
+    cout << endl << endl;
 
     for (int i = 0; i < height; i++) {
         // Add horizontal padding for boss mode
         if (isBossMode == true) {
-            cout << setw(60) << boss_heal[i];
+            cout << setw(60) << arenaFace[i];
         }
-        
+
         cout << setw(width);
+
 
         for (int j = 0; j < width; j++) {
             if (arena[i][j] == 1 || arena[i][j] == 7) {
@@ -472,7 +535,7 @@ void fillBottomRow(int arena[height][width], int tetromino_y, int tetromino_x, i
     }
 }
 
- void clearLines(int arena[height][width], int &bossHealth, int arenaColors[height][width]) {
+void clearLines(int arena[height][width], int &bossHealth, int arenaColors[height][width], bool &bossDamaged) {
      for (int i = 1; i < height - 1; i++) {
          bool fullLine = true;
          for (int j = 1; j < width - 1; j++) {
@@ -491,6 +554,7 @@ void fillBottomRow(int arena[height][width], int tetromino_y, int tetromino_x, i
                   bossHealth -= 100;
               }
               mana++;
+              bossDamaged = true;
              for (int j = 1; j < width - 1; j++) {
                  arena[i][j] = 0;
              }
@@ -1119,7 +1183,7 @@ void activatePlayerSkills(char control, int arena[height][width], int &bossHealt
         }
     } else if (control == '2' && mana >= 3 && cdSkill2 == 0) {
         fillBottomRow(arena, tetrominoY, tetrominoX, randomTetromino);
-        clearLines(arena, bossHealth, arenaColors);
+        clearLines(arena, bossHealth, arenaColors, bossDamaged);
         cdSkill2 = 30;
         mana -= 3;
     } else if (control == '3' && mana >= 5) {
@@ -1131,31 +1195,39 @@ void activatePlayerSkills(char control, int arena[height][width], int &bossHealt
     }
 }
 
-void displaySkillStatus(bool skill_1_active, bool skill_2_active, bool skill_3_active) {
+void displaySkillStatus(bool skill_1_active, bool skill_2_active, bool skill_3_active, bool rage) {
 
-    // Cek skill 1
-    if (skill_1_active && cdSkill1 == 0) {
-        cout << "Skill 1 (Double Damage): Active" << endl;
-    } else if (cdSkill1 > 0) {
-        cout << "Skill 1 (Double Damage): Inactive - Coldown : " << cdSkill1 << endl;
-    } else {
-        cout << "Skill 1 (Double Damage): Inactive" << endl;
-    }
+    if (!rage) {
+    const int instructionPadding = 73;
+    int consoleWidth = 120;
+    int arenaWidth = width;
+    int horizontalPadding = isBossMode ? (consoleWidth - arenaWidth) / 2 : 0;
+        // Cek skill 1
+        if (skill_1_active && cdSkill1 == 0) {
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 1 (Double Damage): Active" << endl;
+        } else if (cdSkill1 > 0) {
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 1 (Double Damage): Inactive - Coldown : " << cdSkill1 << endl;
+        } else {
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 1 (Double Damage): Inactive" << endl;
+        }
 
-    //Cek Skill 2
-    if (skill_2_active) {
-        cout << "Skill 2 (Destroy Lower Lines): Active" << endl;
-    } else {
-        cout << "Skill 2 (Destroy Lower Lines): Inactive - Coldown : " << cdSkill2 << endl;
-    }
+        //Cek Skill 2
+        if (skill_2_active) {
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 2 (Destroy Lower Lines): Active" << endl;
+        } else {
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 2 (Destroy Lower Lines): Inactive - Coldown : " << cdSkill2 << endl;
+        }
 
-    // Cek skill 3
-    if (skill_3_active && cdUltimate == 0) {
-        cout << "Skill 3 (Shield/Defense): Active" << endl;
-    } else if (cdUltimate > 0) {
-        cout << "Skill 3 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
+        // Cek skill 3
+        if (skill_3_active && cdUltimate == 0) {
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 3 (Shield/Defense): Active" << endl;
+        } else if (cdUltimate > 0) {
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 3 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
+        } else {
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 3 (Shield/Defense): Inactive" << endl;
+        }
     } else {
-        cout << "Skill 3 (Shield/Defense): Inactive" << endl;
+        cout << "The boss is raging You can't use your skills" << endl;
     }
 }
 
@@ -1168,7 +1240,7 @@ void runGame(int bossHealth, int interval) {
     int nextTetrominoIndex = rand() % 7; // Index untuk tetronimo berikutnya
     vector<vector<int>> nextTetromino = tetromino[nextTetrominoIndex]; // vector next tetronimo
     int arena[height][width] = {0};
-    bool flag = true, muteMove = true;
+    bool flag = true, muteMove = true, rage = false;
     int limitHealth = bossHealth;
     string skillName;
     int tempY, randomSkill, counter = 1; // counter buat ngitung detik atau ms
@@ -1176,7 +1248,7 @@ void runGame(int bossHealth, int interval) {
     score = 0;
     string bossSkillMessage = "";
     string playerSkillMessage = "";
-
+    bool bossDamaged = false;
     system("cls");
 
     cout << "Enter Your Name : ";
@@ -1215,7 +1287,9 @@ void runGame(int bossHealth, int interval) {
                         drop = true;
                         flag = false;
                     } else if(control == '1' || control == '2' || control == '3') {
-                        activatePlayerSkills(control, arena, bossHealth, tetromino_x, tetromino_y, randomTetromino);
+                        if (!rage) {
+                            activatePlayerSkills(control, arena, bossHealth, tetromino_x, tetromino_y, randomTetromino);
+                        }
                     }
 
                 } else {
@@ -1233,6 +1307,9 @@ void runGame(int bossHealth, int interval) {
             }
 
             if (counter % interval == 0) { // interval kapan boss nyerang
+                    if (randomSkill == 1 || randomSkill == 2 || randomSkill == 3){
+                        bossUsingSkill = true;
+                    }
                 int changeTetromino = rand() % 7;
                 muteMove = true;
                 do {
@@ -1252,6 +1329,7 @@ void runGame(int bossHealth, int interval) {
                         bossSkillMessage = "Boss used a Skill: Force Drop!";
                     } else if (randomSkill == 3) { // Skill3: Nambah darah boss
                         bossHealth += 50;
+                        bossHealing = true;
                         bossSkillMessage = "Boss used a Skill: Healing!";
                     } else { // Skill4: blokir player move
                         muteMove = false;
@@ -1298,7 +1376,7 @@ void runGame(int bossHealth, int interval) {
         cout << "Boss Health: " << bossHealth << endl;
         hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
         draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex, true, bossSkillMessage + "\n" + playerSkillMessage);
-        clearLines(arena, bossHealth, arenaColors);
+        clearLines(arena, bossHealth, arenaColors, bossDamaged);
 
         //cd berkurang
         if(shieldActive) {
@@ -1319,6 +1397,10 @@ void runGame(int bossHealth, int interval) {
             if (cdSkill2 > 0) {
                 cdSkill2--;
             }
+        }
+
+        if (bossHealth <= 300) {
+            rage = true;
         }
 
         //kriteria skill
@@ -1344,7 +1426,8 @@ void runGame(int bossHealth, int interval) {
             skill_3_active = false; // Inactive if mana < 5
         }
 
-        displaySkillStatus(skill_1_active, skill_2_active, skill_3_active);
+        displaySkillStatus(skill_1_active, skill_2_active, skill_3_active, rage);
+        bossUsingSkill = false;
         Sleep(100);
         system("cls");
     }
