@@ -1078,46 +1078,37 @@ skip_intro: // Skip to insert name
     Sleep(2000);
 }
 
-void intro_boss(){
-    string line_1[11]={"As", "you", "clear", "your", "last Tetrimino,", "the ground", "shakes", "and a giant", "skull head", "rises before you.", "A voice booms:"};
-    string line_2[4]={"WELCOME,", "PLAYER.", "YOU'VE", "GONE TOO FAR."};
-    string line_3[9]={"Meet TETROFENDER-X,", "once a guardian of Tetriminos,", "now", "a deranged machine", "obsessed with eliminating chaos.", "Its arsenal of tools,", "rotating walls,", "and super-powered blocks are ready to crush you."};
-    string line_4[5]={"MY", "BLOCKS", "WILL", "DESTROY", "YOU!"};
-    string line_5[4]={"Can the Player", "defeat the mighty Tetrofender-X", "and", "restore order to the Tetris world?"};
+void intro_boss() {
+    string line_1[11] = {"As", "you", "clear", "your", "last Tetrimino,", "the ground", "shakes", "and a giant", "skull head", "rises before you.", "A voice booms:"};
+    string line_2[4] = {"WELCOME,", "PLAYER.", "YOU'VE", "GONE TOO FAR."};
+    string line_3[9] = {"Meet TETROFENDER-X,", "once a guardian of Tetriminos,", "now", "a deranged machine", "obsessed with eliminating chaos.", "Its arsenal of tools,", "rotating walls,", "and super-powered blocks are ready to crush you."};
+    string line_4[5] = {"MY", "BLOCKS", "WILL", "DESTROY", "YOU!"};
+    string line_5[4] = {"Can the Player", "defeat the mighty Tetrofender-X", "and", "restore order to the Tetris world?"};
 
-    for (int i=0; i<11; i++){
-        cout << line_1[i] << " ";
-        this_thread::sleep_for(chrono::milliseconds(500));
-    }
+    bool skip = false;  // Flag to detect if Enter is pressed
 
-    for (int i=0; i<4; i++){
-        cout << line_2[i] << " ";
-        this_thread::sleep_for(chrono::seconds(1));
-    }
+    // print a line with delay or all at once if Enter is pressed
+    auto printLine = [&](const string arr[], int size, int delay_ms) {
+        for (int i = 0; i < size; i++) {
+            cout << arr[i] << " ";
+            if (!skip && _kbhit() && (getchar() == '\n')) {
+                skip = true;  // Set the skip flag when Enter is pressed
+            }
+            if (!skip) {
+                this_thread::sleep_for(chrono::milliseconds(delay_ms));  // Delay only if skip is false
+            }
+        }
+        cout << endl;
+    };
 
-    cout << endl;
+    // Print intro lines
+    printLine(line_1, 11, 500);
+    printLine(line_2, 4, 1000);
+    printLine(line_3, 9, 525);
+    printLine(line_4, 5, 1000);
+    printLine(line_5, 4, 500);
 
-    for (int i=0; i<9; i++){
-        cout << line_3[i] << " ";
-        this_thread::sleep_for(chrono::milliseconds(525));
-    }
-
-    cout << endl;
-
-    for (int i=0; i<5; i++){
-        cout << line_4[i] << " ";
-        this_thread::sleep_for(chrono::seconds(1));
-    }
-
-    cout << endl;
-
-    for (int i=0; i<4; i++){
-        cout << line_5[i] << " ";
-        this_thread::sleep_for(chrono::milliseconds(500));
-    }
-
-    cout << endl << endl;
-    cout << "The boss fight is starting...";
+    cout << endl << "The boss fight is starting..." << endl;
 }
 
 void runNormalGame(const string& playerName) {
