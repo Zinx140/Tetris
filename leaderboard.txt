@@ -1,1 +1,4 @@
-Zinx 200
+Ray 1000
+Zinx 400
+ 0
+ss 0

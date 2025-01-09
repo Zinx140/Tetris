@@ -26,16 +26,16 @@ vector<int> scores;
 int mana = 60;
 string arenaFace[height];
 
+bool isDamaged = false;
+bool bossDamaged = false;
+bool bossHealing = false;
+bool bossUsingSkill = false;
+
 bool skill_1_active = false;
 bool skill_2_active = false;
 bool skill_3_active = false;
 bool doubleDamage = false;
 bool shieldActive = false;
-
-bool isDamaged = false;
-bool bossDamaged = false;
-bool bossHealing = false;
-bool bossUsingSkill = false;
 
 int cdUltimate = 0;
 int cdSkill2 = 0;
@@ -387,7 +387,7 @@ void maximizeConsole() {
 }
 
 // Fungsi untuk menggambar arena
-void draw(int arena[height][width], int arenaColors[height][width], vector<vector<int>> &nextTetromino, int currentTetrominoIndex, int nextTetrominoIndex, bool isBossMode, string messages) {
+void draw(int arena[height][width], int arenaColors[height][width], vector<vector<int>> &nextTetromino, int currentTetrominoIndex, int nextTetrominoIndex, bool isBossMode, string messages, int bossHealth) {
     const int boxHeight = 4;
     const int boxWidth = 4;
     const int horizontalSpacing = 5;
@@ -399,16 +399,16 @@ void draw(int arena[height][width], int arenaColors[height][width], vector<vecto
     const int instructionPadding = 26;
     display_boss_random(arenaFace, isDamaged, bossHealing, bossUsingSkill);
 
-    cout << endl << endl;
+    if (isBossMode) {
+        cout << setw(45) << "Mana : " << mana << endl;
+        cout << setw(45) << "Boss Health : " << bossHealth << endl;
+    }
 
     for (int i = 0; i < height; i++) {
         // Add horizontal padding for boss mode
         if (isBossMode == true) {
             cout << setw(60) << arenaFace[i];
         }
-
-        cout << setw(width);
-
 
         for (int j = 0; j < width; j++) {
             if (arena[i][j] == 1 || arena[i][j] == 7) {
@@ -531,7 +531,6 @@ void fillBottomRow(int arena[height][width], int tetromino_y, int tetromino_x, i
 
     for (int j = 1; j < width - 1; j++) {
         arena[i][j] = 7;
-        arenaColors[tetromino_y + i - 1][tetromino_x + j] = tetrominoColors[randomTetromino];
     }
 }
 
@@ -1078,46 +1077,35 @@ skip_intro: // Skip to insert name
     Sleep(2000);
 }
 
-void intro_boss(){
-    string line_1[11]={"As", "you", "clear", "your", "last Tetrimino,", "the ground", "shakes", "and a giant", "skull head", "rises before you.", "A voice booms:"};
-    string line_2[4]={"WELCOME,", "PLAYER.", "YOU'VE", "GONE TOO FAR."};
-    string line_3[9]={"Meet TETROFENDER-X,", "once a guardian of Tetriminos,", "now", "a deranged machine", "obsessed with eliminating chaos.", "Its arsenal of tools,", "rotating walls,", "and super-powered blocks are ready to crush you."};
-    string line_4[5]={"MY", "BLOCKS", "WILL", "DESTROY", "YOU!"};
-    string line_5[4]={"Can the Player", "defeat the mighty Tetrofender-X", "and", "restore order to the Tetris world?"};
+void intro_boss() {
+    string line_1[11] = {"As", "you", "clear", "your", "last Tetrimino,", "the ground", "shakes", "and a giant", "skull head", "rises before you.", "A voice booms:"};
+    string line_2[4] = {"WELCOME,", "PLAYER.", "YOU'VE", "GONE TOO FAR."};
+    string line_3[9] = {"Meet TETROFENDER-X,", "once a guardian of Tetriminos,", "now", "a deranged machine", "obsessed with eliminating chaos.", "Its arsenal of tools,", "rotating walls,", "and super-powered blocks are ready to crush you."};
+    string line_4[5] = {"MY", "BLOCKS", "WILL", "DESTROY", "YOU!"};
+    string line_5[4] = {"Can the Player", "defeat the mighty Tetrofender-X", "and", "restore order to the Tetris world?"};
+    bool skip = false;  // Flag to detect if Enter is pressed
+    // print a line with delay or all at once if Enter is pressed
+    auto printLine = [&](const string arr[], int size, int delay_ms) {
+        for (int i = 0; i < size; i++) {
+            cout << arr[i] << " ";
+            if (!skip && _kbhit() && (getchar() == '\n')) {
+                skip = true;  // Set the skip flag when Enter is pressed
+            }
+            if (!skip) {
+                this_thread::sleep_for(chrono::milliseconds(delay_ms));  // Delay only if skip is false
+            }
+        }
+        cout << endl;
+    };
 
-    for (int i=0; i<11; i++){
-        cout << line_1[i] << " ";
-        this_thread::sleep_for(chrono::milliseconds(500));
-    }
+    // Print intro lines
+    printLine(line_1, 11, 500);
+    printLine(line_2, 4, 1000);
+    printLine(line_3, 9, 525);
+    printLine(line_4, 5, 1000);
+    printLine(line_5, 4, 500);
 
-    for (int i=0; i<4; i++){
-        cout << line_2[i] << " ";
-        this_thread::sleep_for(chrono::seconds(1));
-    }
-
-    cout << endl;
-
-    for (int i=0; i<9; i++){
-        cout << line_3[i] << " ";
-        this_thread::sleep_for(chrono::milliseconds(525));
-    }
-
-    cout << endl;
-
-    for (int i=0; i<5; i++){
-        cout << line_4[i] << " ";
-        this_thread::sleep_for(chrono::seconds(1));
-    }
-
-    cout << endl;
-
-    for (int i=0; i<4; i++){
-        cout << line_5[i] << " ";
-        this_thread::sleep_for(chrono::milliseconds(500));
-    }
-
-    cout << endl << endl;
-    cout << "The boss fight is starting...";
+    cout << endl << "The boss fight is starting..." << endl;
 }
 
 void runNormalGame(const string& playerName) {
@@ -1130,7 +1118,7 @@ void runNormalGame(const string& playerName) {
     vector<vector<int>> nextTetromino = tetromino[nextTetrominoIndex]; // vector next tetronimo
     int arena[height][width] = {0};
     bool flag = true;
-    int tempY, counter = 0;
+    int tempY, bossHealth, counter = 0;
     score = 0;
     string bossSkillMessage="";
     system("cls");
@@ -1165,7 +1153,10 @@ void runNormalGame(const string& playerName) {
                 } else if (control == 's') {
                     drop = true;
                     flag = false;
+                } else if (int(control) == 27) {
+                    break;
                 }
+
             }
 
             summonTetromino(arena, arenaColors, tetromino_x, tetromino_y, currentTetromino, randomTetromino);
@@ -1205,7 +1196,7 @@ void runNormalGame(const string& playerName) {
 
         counter++;
         hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
-        draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex, false, bossSkillMessage);
+        draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex, false, bossSkillMessage, bossHealth);
         clearLines(arena, arenaColors);
         Sleep(100);
         system("cls");
@@ -1330,6 +1321,8 @@ void runGame(int bossHealth, int interval) {
                         if (!rage) {
                             activatePlayerSkills(control, arena, bossHealth, tetromino_x, tetromino_y, randomTetromino);
                         }
+                    } else if (int(control) == 27) {
+                        break;
                     }
 
                 } else {
@@ -1354,7 +1347,7 @@ void runGame(int bossHealth, int interval) {
                 muteMove = true;
                 do {
                     randomSkill = rand() % 4 + 1;
-                } while((randomSkill == 3 && bossHealth + 50 > limitHealth) || (randomSkill == 1 && !canRandom(changeTetromino, arena, tetromino_x, tetromino_y)));
+                } while((randomSkill == 3 && (bossHealth + 50 >= limitHealth) || rage) || (randomSkill == 1 && !canRandom(changeTetromino, arena, tetromino_x, tetromino_y)));
 
                 if (shieldActive) {
 //                    cout << "Boss skill blocked by Shield!" << endl;
@@ -1412,10 +1405,8 @@ void runGame(int bossHealth, int interval) {
 
 
         counter++; // buat nambah detik
-        cout << "Mana : " << mana << endl;
-        cout << "Boss Health: " << bossHealth << endl;
         hardDrop(arena, currentTetromino, tetromino_x, tetromino_y, drop, tempY, randomTetromino);
-        draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex, true, bossSkillMessage + "\n" + playerSkillMessage);
+        draw(arena, arenaColors, nextTetromino, randomTetromino, nextTetrominoIndex, true, bossSkillMessage + "\n" + playerSkillMessage, bossHealth);
         clearLines(arena, bossHealth, arenaColors, bossDamaged);
 
         //cd berkurang
@@ -1494,42 +1485,54 @@ int main() {
     int difficulty = 0; // Default temporary value
     int start_line = 5; // Starting line for the submenu
 
+
     while (true){
-    stopMusic();
-    int selection_menu = main_menu(console_width, menu_width);
-    int easy = 3000, intervalEasy = 60; // easy, medium,
-    int medium = 4500, intervalMed = 45;
-    int hard = 6000, intervalHard = 30;
+        stopMusic();
+        int selection_menu = main_menu(console_width, menu_width);
+        int easy = 3000, intervalEasy = 60; // easy, medium,
+        int medium = 4500, intervalMed = 45;
+        int hard = 6000, intervalHard = 30;
+        skill_1_active = false;
+        skill_2_active = false;
+        skill_3_active = false;
+        doubleDamage = false;
+        shieldActive = false;
+        mana = 60;
 
-    if (selection_menu == 0){
-        int selection_submenu = play_submenu(console_width, menu_width, difficulty, start_line);
+        cdUltimate = 0;
+        cdSkill2 = 0;
+        cdSkill1 = 0;
 
-        if (selection_submenu == 0){
-            system("cls");
-            string playerName = intro();
-            Sleep(2500);
-            runNormalGame(playerName);
-        } else if (selection_submenu == 1){
-            int selection_difficulty = difficulty_menu(console_width, menu_width, start_line);
+        if (selection_menu == 0){
+            int selection_submenu = play_submenu(console_width, menu_width, difficulty, start_line);
 
-            if (selection_difficulty == 0){
-                runGame(easy, intervalEasy);
-            } else if (selection_difficulty == 1){
-                runGame (medium, intervalMed);
-            } else if (selection_difficulty == 2){
-                runGame (hard, intervalHard);
+            if (selection_submenu == 0){
+                system("cls");
+                string playerName = intro();
+                Sleep(2500);
+                runNormalGame(playerName);
+            } else if (selection_submenu == 1){
+                int selection_difficulty = difficulty_menu(console_width, menu_width, start_line);
+
+                if (selection_difficulty == 0){
+                    runGame(easy, intervalEasy);
+                } else if (selection_difficulty == 1){
+                    runGame (medium, intervalMed);
+                } else if (selection_difficulty == 2){
+                    runGame (hard, intervalHard);
+                }
+            } else if (selection_submenu == -1){
+                continue;
             }
-        } else if (selection_submenu == -1){
-            continue;
-        }
-    } else if (selection_menu == 1){
-        showLeaderboard();
-    } else if (selection_menu == 2){
-        playSound("sfx/exit.wav");
-        this_thread::sleep_for(chrono::milliseconds(1500));
-        break;
+        } else if (selection_menu == 1){
+            showLeaderboard();
+        } else if (selection_menu == 2){
+            playSound("sfx/exit.wav");
+            this_thread::sleep_for(chrono::milliseconds(1500));
+            break;
 
+        }
     }
-}
+    
     return 0;
 }
