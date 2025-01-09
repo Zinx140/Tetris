@@ -204,6 +204,34 @@ string boss_heal[] = {
     "                                      ",
 };
 
+void display_boss_random() {
+    srand((unsigned int)time(NULL));
+
+    while (true) {
+        int randomAction = rand() % 4;
+        int randomMovement = rand() % 2;
+        system("cls");
+        if (randomMovement == 1){
+            cout << endl;
+        }
+        switch (randomAction) {
+            case 0:
+                boss_look_left();
+                break;
+            case 1:
+                boss_look_right();
+                break;
+            case 2:
+                boss_mouth();
+                break;
+            case 3:
+                boss_default();
+                break;
+        }
+        this_thread::sleep_for(chrono::seconds(3));
+    }
+}
+
 // Tetromino menggunakan vector
 vector<vector<vector<int>>> tetromino = {
     {{1, 1, 1, 1}},                  // I
