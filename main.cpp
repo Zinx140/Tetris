@@ -23,7 +23,7 @@ int score = 0;
 string playerName;
 vector<string> playerNames;
 vector<int> scores;
-int mana = 60;
+int mana;
 string arenaFace[height];
 
 bool isDamaged = false;
@@ -1209,23 +1209,19 @@ void runNormalGame(const string& playerName) {
 }
 
 void activatePlayerSkills(char control, int arena[height][width], int &bossHealth, int tetrominoX, int tetrominoY, int randomTetromino) {
-    if (control == '1' && mana >= 1) {
-        if(cdSkill1 <= 0) {
+    if (control == '1' && mana >= 1 && cdSkill1 == 0) {
             doubleDamage = true;
             cdSkill1 = 60;
             mana--;
-        }
     } else if (control == '2' && mana >= 3 && cdSkill2 == 0) {
         fillBottomRow(arena, tetrominoY, tetrominoX, randomTetromino);
         clearLines(arena, bossHealth, arenaColors, bossDamaged);
-        cdSkill2 = 30;
+        cdSkill2 = 5;
         mana -= 3;
-    } else if (control == '3' && mana >= 5) {
-        if(cdUltimate <= 0) {
+    } else if (control == '3' && mana >= 5 && cdUltimate == 0) {
             shieldActive = true;
             cdUltimate = 120;
             mana -= 5;
-        }
     }
 }
 
@@ -1248,8 +1244,10 @@ void displaySkillStatus(bool skill_1_active, bool skill_2_active, bool skill_3_a
         //Cek Skill 2
         if (skill_2_active) {
             cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 2 (Destroy Lower Lines): Active" << endl;
-        } else {
+        } else if (cdSkill2 > 0) {
             cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 2 (Destroy Lower Lines): Inactive - Coldown : " << cdSkill2 << endl;
+        } else {
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 2 (Destroy Lower Lines): Inactive" << endl;
         }
 
         // Cek skill 3
@@ -1449,7 +1447,7 @@ void runGame(int bossHealth, int interval) {
         }
 
         if (mana >= 5) {
-            if (cdUltimate > 0) {
+            if (cdUltimate == 0) {
                 skill_3_active = true; // Still active while cooldown runs
             } else {
                 skill_3_active = false; // Inactive once cooldown finishes
@@ -1498,7 +1496,7 @@ int main() {
         skill_3_active = false;
         doubleDamage = false;
         shieldActive = false;
-        mana = 60;
+        mana = 5;
 
         cdUltimate = 0;
         cdSkill2 = 0;
@@ -1534,6 +1532,6 @@ int main() {
 
         }
     }
-    
+
     return 0;
 }
