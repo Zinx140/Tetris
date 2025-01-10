@@ -242,9 +242,9 @@ void display_boss_random(string arenaFace[], bool bossDamaged, bool bossHealing,
     }
 
         if (elapsed >= 4){
-            if (randomMovement == 1){
-            cout << endl;
-            }
+//            if (randomMovement == 1){
+//            cout << endl;
+//            }
             int randomAction = rand() % 4;
             switch (randomAction) {
             case 0:
@@ -999,6 +999,7 @@ string intro() {
 
     string playerName = "";
 
+    playMusic("music/intro.wav");
     cout << endl;
     cout << horizontal_padding << "Group project made by:" << endl;
     cout << endl;
@@ -1085,6 +1086,8 @@ void intro_boss() {
 
     bool skip = false;  // Flag to detect if Enter is pressed
 
+    playMusic("music/intro.wav");
+
     // print a line with delay or all at once if Enter is pressed
     auto printLine = [&](const string arr[], int size, int delay_ms) {
         for (int i = 0; i < size; i++) {
@@ -1123,6 +1126,8 @@ void runNormalGame(const string& playerName) {
     score = 0;
     string bossSkillMessage="";
     system("cls");
+
+    stopMusic();
 
     Sleep(1500);
 
@@ -1281,15 +1286,32 @@ void runGame(int bossHealth, int interval) {
     string bossSkillMessage = "";
     string playerSkillMessage = "";
     bool bossDamaged = false;
+    bool bossHalfHealthMusicPlayed = false; // Track if boss2.wav has been played
+    bool bossRageMusicPlayed = false;      // Track if bossberserk.wav has been played
     system("cls");
 
     intro_boss();
+
+    stopMusic();
 
     Sleep(1500);
 
     system("cls");
 
+    playMusic("music/boss1.wav");
+
     while (!gameOver(arena) && bossHealth > 0) {
+
+        if (bossHealth <= limitHealth / 2 && !bossHalfHealthMusicPlayed && !rage) {
+            playMusic("music/boss2.wav");
+            bossHalfHealthMusicPlayed = true;
+        }
+
+        // Check if rage is activated and play bossberserk.wav if not already played
+        if (rage && !bossRageMusicPlayed) {
+            playMusic("music/bossberserk.wav");
+            bossRageMusicPlayed = true;
+        }
         bool drop = false;
         if (canMove(arena, tetromino_x, tetromino_y, currentTetromino) && flag) {
             dx = 0;
