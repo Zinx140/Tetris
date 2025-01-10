@@ -1222,7 +1222,7 @@ void activatePlayerSkills(char control, int arena[height][width], int &bossHealt
         fillBottomRow(arena, tetrominoY, tetrominoX, randomTetromino);
         clearLines(arena, bossHealth, arenaColors, bossDamaged);
         cdSkill2 = 5;
-        mana -= 3;
+        mana -= 4;
     } else if (control == '3' && mana >= 5 && cdUltimate == 0) {
             shieldActive = true;
             cdUltimate = 120;
@@ -1239,29 +1239,29 @@ void displaySkillStatus(bool skill_1_active, bool skill_2_active, bool skill_3_a
     int horizontalPadding = isBossMode ? (consoleWidth - arenaWidth) / 2 : 0;
         // Cek skill 1
         if (skill_1_active && cdSkill1 == 0) {
-            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 1 (Double Damage): Active" << endl;
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 1 (Double Damage) | mana cost 1: Active" << endl;
         } else if (cdSkill1 > 0) {
-            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 1 (Double Damage): Inactive - Coldown : " << cdSkill1 << endl;
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 1 (Double Damage) | mana cost 1: Inactive - Coldown : " << cdSkill1 << endl;
         } else {
-            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 1 (Double Damage): Inactive" << endl;
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 1 (Double Damage) | mana cost 1: Inactive" << endl;
         }
 
         //Cek Skill 2
         if (skill_2_active) {
-            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 2 (Destroy Lower Lines): Active" << endl;
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 2 (Destroy Lower Lines) | mana cost 3: Active" << endl;
         } else if (cdSkill2 > 0) {
-            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 2 (Destroy Lower Lines): Inactive - Coldown : " << cdSkill2 << endl;
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 2 (Destroy Lower Lines) | mana cost 3: Inactive - Coldown : " << cdSkill2 << endl;
         } else {
-            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 2 (Destroy Lower Lines): Inactive" << endl;
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 2 (Destroy Lower Lines) | mana cost 3: Inactive" << endl;
         }
 
         // Cek skill 3
         if (skill_3_active && cdUltimate == 0) {
-            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 3 (Shield/Defense): Active" << endl;
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 3 (Shield/Defense) | mana cost 5: Active" << endl;
         } else if (cdUltimate > 0) {
-            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 3 (Shield/Defense): Active" << " - Coldown : " << cdUltimate << endl;
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 3 (Shield/Defense) | mana cost 5: Active" << " - Coldown : " << cdUltimate << endl;
         } else {
-            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 3 (Shield/Defense): Inactive" << endl;
+            cout << string(horizontalPadding + instructionPadding, ' ') << "Skill 3 (Shield/Defense) | mana cost 5: Inactive" << endl;
         }
     } else {
         cout << "The boss is raging You can't use your skills" << endl;
@@ -1451,9 +1451,9 @@ void runGame(int bossHealth, int interval) {
             }
         }
 
-        if (bossHealth <= 300) {
-            rage = true;
-        }
+        // if (bossHealth <= 300) {
+        //     rage = true;
+        // }
 
         //kriteria skill
         if (mana >= 1) {
@@ -1510,7 +1510,7 @@ int main() {
     while (true){
         stopMusic();
         int selection_menu = main_menu(console_width, menu_width);
-        int easy = 3000, intervalEasy = 60; // easy, medium,
+        int easy = 300, intervalEasy = 60; // easy, medium,
         int medium = 4500, intervalMed = 45;
         int hard = 6000, intervalHard = 30;
         skill_1_active = false;
@@ -1518,7 +1518,7 @@ int main() {
         skill_3_active = false;
         doubleDamage = false;
         shieldActive = false;
-        mana = 5;
+        mana = 25;
 
         cdUltimate = 0;
         cdSkill2 = 0;
