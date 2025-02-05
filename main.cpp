@@ -501,7 +501,7 @@ bool canTurnLeft(int arena[height][width], int position_x, int position_y, vecto
     for (int i = 0; i < newHeight; i++) {
         for (int j = 0; j < newWidth; j++) {
             if (currentTetromino[i][j] == 1) {
-                if (arena[position_y + i][position_x - 1] == 7) {
+                if (arena[position_y + i][position_x + j - 1] == 7) {
                     return false;
                 }
             }
@@ -516,7 +516,7 @@ bool canTurnRight(int arena[height][width], int position_x, int position_y, vect
     for (int i = 0; i < newHeight; i++) {
         for (int j = 0; j < newWidth; j++) {
             if (currentTetromino[i][j] == 1) {
-                if (arena[position_y + i][position_x + newWidth] == 7) {
+                if (arena[position_y + i][position_x + j + 1] == 7) {
                     return false;
                 }
             }
@@ -1371,7 +1371,6 @@ void runGame(int bossHealth, int interval) {
                 } while((randomSkill == 3 && (bossHealth + 50 >= limitHealth) || rage) || (randomSkill == 1 && !canRandom(changeTetromino, arena, tetromino_x, tetromino_y)));
 
                 if (shieldActive) {
-//                    cout << "Boss skill blocked by Shield!" << endl;
                       bossSkillMessage = "Boss skill blocked by Shield!";
                 } else {
                     if (randomSkill == 1) { // Skill1: ngubah bentuk tetromino
@@ -1510,7 +1509,7 @@ int main() {
     while (true){
         stopMusic();
         int selection_menu = main_menu(console_width, menu_width);
-        int easy = 300, intervalEasy = 60; // easy, medium,
+        int easy = 3000, intervalEasy = 60; // easy, medium,
         int medium = 4500, intervalMed = 45;
         int hard = 6000, intervalHard = 30;
         skill_1_active = false;
