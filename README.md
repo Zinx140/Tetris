@@ -3,6 +3,9 @@
   <img src="dokumentasi/c++.png" width="350px">
 </div>
 
+#Apa saja yang ada dalam game ?
+<h2 align="center">Fitur 1: Normal Mode</h2>
+
 # Algoritma Dasar 
   Yang pertama bentuk dulu pakai array atau vector 3D Dimensi 1 isinya untuk randoman bentuk tetromino yang akan keluar, Dimensi 2 dan Dimensi 3 nya berguna
 untuk menggambar bentuk tetromino yang akan digambar dimana yang angka 1 akan digambar sedangkan yang angka 0 tidak akan dimunculkan dalam layar. Untuk jatuhnya
@@ -158,7 +161,74 @@ void hardDrop(int arena[height][width], vector<vector<int>> currentTetromino, in
 ```
 
 Cara kerja: 
-1. Make function canMove buat ngecek pada ketinggian berapa dia bakal menyentuh tanah
+1. Memakai function canMove buat ngecek pada ketinggian berapa dia bakal menyentuh tanah
 2. Kalau udah ketemu digambar bayangan nya dengan loop sesuai bentuk tetromino yag jatuh
 3. Cara kerja jatuhnya yang diatas selama ada bentuk nya atau angka 1 bentuknya dihilangkan atau 1 nya diganti 0 lalu ada variable
    Pass By Refference untuk ngubah posisi y tetromino yang lagi jatuh agar langsung ke tanah
+
+# PROCEDURE clearLines - untuk menghapus baris jika tetromino memenuhi 1 baris
+
+```
+void clearLines(int arena[height][width], int &bossHealth, int arenaColors[height][width], bool &bossDamaged) {
+     for (int i = 1; i < height - 1; i++) {
+         bool fullLine = true;
+         for (int j = 1; j < width - 1; j++) {
+             if (arena[i][j] != 7) {
+                 fullLine = false;
+                 break;
+             }
+         }
+         if (fullLine) {
+              if(doubleDamage == true) {
+                  score += 200;
+                  bossHealth -= 200;
+                  doubleDamage = false;
+              } else {
+                  score += 100;
+                  bossHealth -= 100;
+              }
+              mana++;
+              bossDamaged = true;
+             for (int j = 1; j < width - 1; j++) {
+                 arena[i][j] = 0;
+             }
+             for (int k = i; k > 1; k--) {
+                 for (int j = 1; j < width - 1; j++) {
+                     arena[k][j] = arena[k - 1][j];
+                     arenaColors[k][j] = arenaColors[k - 1][j];
+
+                 }
+             }
+         }
+     }
+ }
+
+void clearLines(int arena[height][width], int arenaColors[height][width]) {
+    for (int i = 1; i < height - 1; i++) {
+        bool fullLine = true;
+        for (int j = 1; j < width - 1; j++) {
+            if (arena[i][j] != 7) {
+                fullLine = false;
+                break;
+            }
+        }
+        if (fullLine) {
+            score += 100;
+            for (int j = 1; j < width - 1; j++) {
+                arena[i][j] = 0;
+            }
+            for (int k = i; k > 1; k--) {
+                for (int j = 1; j < width - 1; j++) {
+                    arena[k][j] = arena[k - 1][j];
+                    arenaColors[k][j] = arenaColors[k - 1][j];
+                }
+            }
+        }
+    }
+}
+
+```
+
+Cara kerja:
+1. Pertama mengecek arena tetris per baris dan jika ada yang terputus baris nya akan lanjut ke baris berikut nya dan di cek lagi
+2. Saya menggunakan overloading procedure untuk setiap mode karena dalam mode boss ada skill untuk menghancurkan baris paling bawah
