@@ -1,4 +1,4 @@
-<h1 align="center">Project Tetris</h1>
+<h1 align="center">Tetris Project Using C++ Programming Language</h1>
 <div align="center">
   <img src="dokumentasi/c++.png" width="350px">
 </div>
