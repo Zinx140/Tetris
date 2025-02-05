@@ -12,7 +12,7 @@
 
   <li><h3>Fitur 2: Boss Mode</h3></li>
   <div align="center">
-    <img src="dokumentasi/gameplay2.png" width="350px">
+    <img src="dokumentasi/gameplay2.png" width="100%">
   </div>
 </ul>
 
