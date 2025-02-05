@@ -6,8 +6,29 @@ peta integer karena mudah saat mengatur atau dalam pengecekan input nya karena k
 prosedur Draw untuk menggambar game kita
 
 # FUNCTION canMove - buat ngecek kapan si tetromino berhenti jatuh 
+
+```
+bool canMove(int arena[height][width], int position_x, int position_y, vector<vector<int>> &currentTetromino) {
+    int newHeight = currentTetromino.size();
+    int newWidth = currentTetromino[0].size();
+    for (int i = 0; i < newHeight; i++) {
+        for (int j = 0; j < newWidth; j++) {
+            if (currentTetromino[i][j] == 1) {
+                int newY = position_y + i;
+                int newX = position_x + j;
+                if (newY >= height || newX < 0 || newX >= width || arena[newY][newX] == 7 || arena[newY][newX] == 2) {
+                    return false; // Tidak bisa bergerak
+                }
+            }
+        }
+    }
+    return true;
+}
+
+```
+
 Cara kerja:
-1. Yang pertama aku buat loop untuk mengamvil tetromino yang isinya 1 dulu lalu kita ikuti pergerakan turun nya seperti normal nya
+1. Yang pertama aku buat loop untuk mengambil tetromino yang isinya 1 dulu lalu kita ikuti pergerakan turun nya seperti normal nya
 2. Kalau salah satu bagian tetromino yang berisi angka 1 sudah menyentuh tanah sehingga kalau sudah nyentuh tanah dia bakal berhentiin
    loop yang ada di main dan main sendiri akan menggambar nya di posisi sebelum menyentuh tanah nya
 
