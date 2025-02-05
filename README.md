@@ -6,6 +6,7 @@
 # Apa saja yang ada dalam game ?
 <ul>
   <li><h3>Fitur 1: Normal Mode</h3></li>
+  
   <div align="center">
     <img src="dokumentasi/gameplay1.png" width="350px">
   </div>
@@ -14,6 +15,7 @@
   Sebelum memulai permainan masukkan nama player terlebih dahulu karena akan masuk ke dalam leaderboard.
 
   <li><h3>Fitur 2: Boss Mode (Gunakan Full Screen Mode untuk mendapatkan pengalaman yang baik)</h3></li>
+  
   <div align="center">
     <img src="dokumentasi/gameplay2.png" width="100%">
   </div> 
