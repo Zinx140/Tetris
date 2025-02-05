@@ -4,7 +4,10 @@
 </div>
 
 # Apa saja yang ada dalam game ?
-<h2>Fitur 1: Normal Mode</h2>
+<ol>
+  <li>Fitur 1: Normal Mode</li>
+  <li>Fitur 2: Boss Mode</li>
+</ol>
 
 # Algoritma Dasar 
   Yang pertama bentuk dulu pakai array atau vector 3D Dimensi 1 isinya untuk randoman bentuk tetromino yang akan keluar, Dimensi 2 dan Dimensi 3 nya berguna
