@@ -1,5 +1,7 @@
 <h1 align="center">Project Tetris</h1>
-<img src="dokumentasi/c++.png" width="350px" align="center">
+<div align="center">
+  <img src="dokumentasi/c++.png" width="350px">
+</div>
 
 # Algoritma Dasar 
   Yang pertama bentuk dulu pakai array atau vector 3D Dimensi 1 isinya untuk randoman bentuk tetromino yang akan keluar, Dimensi 2 dan Dimensi 3 nya berguna
