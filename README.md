@@ -3,7 +3,7 @@
   <img src="dokumentasi/c++.png" width="350px">
 </div>
 
-#Apa saja yang ada dalam game ?
+# Apa saja yang ada dalam game ?
 <h2 align="center">Fitur 1: Normal Mode</h2>
 
 # Algoritma Dasar 
