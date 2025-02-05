@@ -9,10 +9,11 @@
   <div align="center">
     <img src="dokumentasi/gameplay1.png" width="350px">
   </div>
-  <div style="float:right;">
-    <p>Tes</p>
-  </div>
+
   <li><h3>Fitur 2: Boss Mode</h3></li>
+  <div align="center">
+    <img src="dokumentasi/gameplay2.png" width="350px">
+  </div>
 </ul>
 
 # Algoritma Dasar 
