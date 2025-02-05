@@ -7,6 +7,9 @@
 <ul>
   <li><h3>Fitur 1: Normal Mode</h3></li>
   <img src="dokumentasi/gameplay1.png" width="350px">
+  <div style="float:right;">
+    <p>Tes</p>
+  </div>
   <li><h3>Fitur 2: Boss Mode</h3></li>
 </ul>
 
