@@ -10,7 +10,7 @@
   <div align="center">
     <img src="dokumentasi/gameplay1.png" width="350px">
   </div>
-  
+  <br>
   Dalam mode ini game berjalan seperti permainan game tetris normal diaman setiap kita menghancurkan 1 baris skor bertambah 100.
   Sebelum memulai permainan masukkan nama player terlebih dahulu karena akan masuk ke dalam leaderboard.
 
@@ -19,7 +19,7 @@
   <div align="center">
     <img src="dokumentasi/gameplay2.png" width="100%">
   </div> 
-  
+  <br>
   Dalam mode ini game berjalan seperti game tetris normal. Namun, yang membuat berbeda dari game tetris lain adalah adanya boss dalam mode ini.
   Dalam mode ini ada 3 tingkat kesulitan berbeda
   
