@@ -6,6 +6,7 @@
 # Apa saja yang ada dalam game ?
 <ul>
   <li><h3>Fitur 1: Normal Mode</h3></li>
+  <img src="dokumentasi/gameplay1.png" width="100%">
   <li><h3>Fitur 2: Boss Mode</h3></li>
 </ul>
 
