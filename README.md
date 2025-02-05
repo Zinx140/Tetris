@@ -6,7 +6,7 @@
 # Apa saja yang ada dalam game ?
 <ul>
   <li><h3>Fitur 1: Normal Mode</h3></li>
-  <div style="float:right;">
+  <div align="center">
     <img src="dokumentasi/gameplay1.png" width="350px">
   </div>
   <div style="float:right;">
