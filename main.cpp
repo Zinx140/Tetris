@@ -399,6 +399,9 @@ void draw(int arena[height][width], int arenaColors[height][width], vector<vecto
     display_boss_random(arenaFace, isDamaged, bossHealing, bossUsingSkill);
 
     if (isBossMode) {
+        if (bossHealth < 0) {
+            bossHealth = 0;
+        }
         cout << setw(45) << "Mana : " << mana << endl;
         cout << setw(45) << "Boss Health : " << bossHealth << endl;
     }
@@ -1501,7 +1504,7 @@ int main() {
         skill_3_active = false;
         doubleDamage = false;
         shieldActive = false;
-        mana = 25;
+        mana = 2;
 
         cdUltimate = 0;
         cdSkill2 = 0;
