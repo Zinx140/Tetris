@@ -23,11 +23,11 @@
   Dalam mode ini game berjalan seperti game tetris normal. Namun, yang membuat berbeda dari game tetris lain adalah adanya boss dalam mode ini.
   Untuk menyerang boss nya adalah dengan mencetak skor dimana skor yang kita dapatkan akan memberikan damage kepada boss.
   Dalam mode ini ada 3 tingkat kesulitan berbeda, yaitu: 
-  1. Easy 
+  > Easy <br>
     - Dalam mode ini kita akan melawan boss yang berdarah 3000 dan akan menyerang kita setiap 6 detik
-  2. Medium
+  > Medium <br>
     - Dalam mode ini kita akan melawan boss yang berdarah 4500 dan akan menyerang kita setiap 4,5 detik
-  3. Hard 
+  > Hard <br>
     - Dalam mode ini kita akan melawan boss yang berdarah 6000 dan akan menyerang kita setiap 3 detik
 
   Seperti yang tertulis di atas bahwa boss dapat menyerang player dengan berbagai skill antara lain:
