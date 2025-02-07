@@ -22,7 +22,7 @@
   <br>
   Dalam mode ini game berjalan seperti game tetris normal. Namun, yang membuat berbeda dari game tetris lain adalah adanya boss dalam mode ini.
   Untuk menyerang boss nya adalah dengan mencetak skor dimana skor yang kita dapatkan akan memberikan damage kepada boss.
-  Dalam mode ini ada 3 tingkat kesulitan berbeda, yaitu: <br>
+  Dalam mode ini ada 3 tingkat kesulitan berbeda yaitu: <br>
   >  Easy <br>
   > Medium <br>
   > Hard <br>
@@ -31,16 +31,16 @@
     - Dalam mode ini kita akan melawan boss yang berdarah 6000 dan akan menyerang kita setiap 3 detik <br>
 
   Seperti yang tertulis di atas bahwa boss dapat menyerang player dengan berbagai skill antara lain: <br>
-  > Change Tetromino
+  > Change Tetromino <br>
     - Skill dari boss ini akan mengubah tetromino yang sedang player gerakkan ke bentuk lain <br>
-  > Force Drop
+  > Force Drop <br>
     - Skill dari boss ini akan langsung menjatuhkan tetromino yang sedang player gerakkan ke bawah <br>
-  > Healing
+  > Healing <br>
     - Skill dari boss ini akan menyembuhkan nyawa dari boss yang sudah terkena serangan dari player sebanyak 50 HP <br>
-  > Movement Blovk
+  > Movement Block <br>
     - Skill dari boss ini akan membuat player tidak akan bisa menggerakkan tetromino yang sedang dia kendalinkan kecuali jika player menjatuhkannya dengan menekan s <br>
     
-  Dalam game ini player diberi mana 2 saat pertama kali memulai game nya. Kegunaan mana dalam game ini adalah untuk mengeluarkan berbagai skill.
+  Dalam game ini player diberi mana 2 saat pertama kali memulai game nya. Kegunaan mana dalam game ini adalah untuk mengeluarkan berbagai skill. <br>
   Daftar skill yang dimiliki player adalah : <br>
   > Skill 1 (Double Damage) <br>
     - Skill ini dapat diaktifkan jika player menekan angka 1 pada keyboard dan akan menggunakan mana sebesar 1. <br>
