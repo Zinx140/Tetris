@@ -23,31 +23,31 @@
   Dalam mode ini game berjalan seperti game tetris normal. Namun, yang membuat berbeda dari game tetris lain adalah adanya boss dalam mode ini.
   Untuk menyerang boss nya adalah dengan mencetak skor dimana skor yang kita dapatkan akan memberikan damage kepada boss.
   Dalam mode ini ada 3 tingkat kesulitan berbeda, yaitu: <br>
-  > Easy <br>
-    - Dalam mode ini kita akan melawan boss yang berdarah 3000 dan akan menyerang kita setiap 6 detik <br>
+  >  Easy <br>
   > Medium <br>
-    - Dalam mode ini kita akan melawan boss yang berdarah 4500 dan akan menyerang kita setiap 4,5 detik <br>
   > Hard <br>
+    - Dalam mode ini kita akan melawan boss yang berdarah 3000 dan akan menyerang kita setiap 6 detik <br>
+    - Dalam mode ini kita akan melawan boss yang berdarah 4500 dan akan menyerang kita setiap 4,5 detik <br>
     - Dalam mode ini kita akan melawan boss yang berdarah 6000 dan akan menyerang kita setiap 3 detik <br>
 
-  Seperti yang tertulis di atas bahwa boss dapat menyerang player dengan berbagai skill antara lain:
-  > Change Tetromino - Skill dari boss ini akan mengubah tetromino yang sedang player gerakkan ke bentuk lain
-  > Force Drop - Skill dari boss ini akan langsung menjatuhkan tetromino yang sedang player gerakkan ke bawah
-  > Healing - Skill dari boss ini akan menyembuhkan nyawa dari boss yang sudah terkena serangan dari player sebanyak 50 HP
-  > Movement Blovk - Skill dari boss ini akan membuat player tidak akan bisa menggerakkan tetromino yang sedang dia kendalinkan kecuali jika player menjatuhkannya dengan menekan s 
+  Seperti yang tertulis di atas bahwa boss dapat menyerang player dengan berbagai skill antara lain: <br>
+  > Change Tetromino - Skill dari boss ini akan mengubah tetromino yang sedang player gerakkan ke bentuk lain <br>
+  > Force Drop - Skill dari boss ini akan langsung menjatuhkan tetromino yang sedang player gerakkan ke bawah <br>
+  > Healing - Skill dari boss ini akan menyembuhkan nyawa dari boss yang sudah terkena serangan dari player sebanyak 50 HP <br>
+  > Movement Blovk - Skill dari boss ini akan membuat player tidak akan bisa menggerakkan tetromino yang sedang dia kendalinkan kecuali jika player menjatuhkannya dengan menekan s <br>
     
-  Dalam game ini player diberi mana 2 saat pertama kali memulai game nya. Kegunaan mana dalam game ini adalah untuk mengeluarkan berbagai skill.
-  Daftar skill yang dimiliki player adalah :
-  > Skill 1 (Double Damage)
-    - Skill ini dapat diaktifkan jika player menekan angka 1 pada keyboard dan akan menggunakan mana sebesar 1.
-      Skill ini berguna untuk memberikan efek double damage pada serangan berikutnya.
-  > Skill 2 (Destroy Lower Lines)
-    - Skill ini dapat diaktifkan jika player menekan angka 2 pada keyboard dan akan menggunakan mana sebesar 3
-      Skill ini berguna untuk menghancurkan layer paling bawah yang ada dalam arena bila kita menggunakan skill ini kita juga akan mendapatkan skor.
-  > skill 3 (Shield/Defense)
-    - Skill ini dapat diaktifkan jika player menekan angka 3 pada keyboard dan akan menggunakan mana sebesar 5
-      Skill ini berguna untuk menangkal semua serangan boss kepada player selama 12 detik
-</ul>
+  Dalam game ini player diberi mana 2 saat pertama kali memulai game nya. Kegunaan mana dalam game ini adalah untuk mengeluarkan berbagai skill. <br>
+  Daftar skill yang dimiliki player adalah : <br>
+  > Skill 1 (Double Damage) <br>
+    - Skill ini dapat diaktifkan jika player menekan angka 1 pada keyboard dan akan menggunakan mana sebesar 1. <br>
+      Skill ini berguna untuk memberikan efek double damage pada serangan berikutnya. <br>
+  > Skill 2 (Destroy Lower Lines) <br>
+    - Skill ini dapat diaktifkan jika player menekan angka 2 pada keyboard dan akan menggunakan mana sebesar 3 <br>
+      Skill ini berguna untuk menghancurkan layer paling bawah yang ada dalam arena bila kita menggunakan skill ini kita juga akan mendapatkan skor. <br>
+  > skill 3 (Shield/Defense) <br>
+    - Skill ini dapat diaktifkan jika player menekan angka 3 pada keyboard dan akan menggunakan mana sebesar 5 <br>
+      Skill ini berguna untuk menangkal semua serangan boss kepada player selama 12 detik <br>
+</ul> 
 
 # Algoritma Dasar 
   Yang pertama bentuk dulu pakai array atau vector 3D Dimensi 1 isinya untuk randoman bentuk tetromino yang akan keluar, Dimensi 2 dan Dimensi 3 nya berguna
